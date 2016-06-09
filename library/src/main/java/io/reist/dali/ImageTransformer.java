@@ -1,4 +1,4 @@
-package com.zvooq.dali;
+package io.reist.dali;
 
 /**
  * Created by m039 on 12/30/15.

@@ -1,4 +1,4 @@
-package com.zvooq.dali;
+package io.reist.dali;
 
 import android.annotation.TargetApi;
 import android.content.Context;

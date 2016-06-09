@@ -1,4 +1,4 @@
-package com.zvooq.dali;
+package io.reist.dali;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

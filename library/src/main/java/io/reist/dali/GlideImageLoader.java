@@ -1,4 +1,4 @@
-package com.zvooq.dali;
+package io.reist.dali;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -22,8 +22,8 @@ import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 import com.bumptech.glide.request.target.BaseTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.ViewTarget;
-import com.zvooq.dali.drawables.CircleFadingBitmapDrawable;
-import com.zvooq.dali.drawables.FadingBitmapDrawable;
+import io.reist.dali.drawables.CircleFadingBitmapDrawable;
+import io.reist.dali.drawables.FadingBitmapDrawable;
 
 import java.util.Map;
 import java.util.WeakHashMap;

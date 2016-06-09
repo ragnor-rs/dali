@@ -14,7 +14,7 @@
             tools:node="remove" />
 
         <meta-data
-            android:name="com.zvooq.dali.DaliGlideModule"
+            android:name="io.reist.dali.DaliGlideModule"
             android:value="GlideModule" />
 
     </application>

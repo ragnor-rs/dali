@@ -1,4 +1,4 @@
-package com.zvooq.dali;
+package io.reist.dali;
 
 import android.content.Context;
 import android.graphics.Bitmap;
