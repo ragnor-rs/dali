@@ -174,15 +174,6 @@ public class Dali implements ImageLoader {
         mMainImageLoader.cancel(o);
     }
 
-
-    /**
-     * Modifies image fetching mechanism
-     */
-    @SuppressWarnings("unused")
-    public static void setImageFactory(DaliImageFactory daliImageFactory) {
-        // todo
-    }
-
     /**
      * Changes Dali main loader implementation. This loader will be used for {@link View}s of known
      * dimensions and {@link DaliCallback}.
