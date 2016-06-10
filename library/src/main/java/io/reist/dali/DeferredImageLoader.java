@@ -16,7 +16,7 @@ import java.util.WeakHashMap;
  * instance, if a view size is known and this size is relatively small, it's possible to use less
  * memory by storing only scaled-down instances of images.
  *
- * Subclasses must have a constructor with {@link ImageLoader} parameter.
+ * Subclasses must have a public constructor with {@link ImageLoader} parameter.
  *
  * Created by m039 on 12/25/15.
  */
@@ -27,7 +27,7 @@ public class DeferredImageLoader implements ImageLoader {
     /**
      * @param mainImageLoader       a real loader to use when a target view is measured
      */
-    DeferredImageLoader(ImageLoader mainImageLoader) {
+    public DeferredImageLoader(ImageLoader mainImageLoader) {
         this.mainImageLoader = mainImageLoader;
     }
 
