@@ -17,7 +17,7 @@ public class ImageServiceLoader implements ImageLoader {
 
     @Override
     public void load(ImageRequestBuilder builder, View view, boolean background) {
-        ImageService.set((ImageView) view, DaliUtils.toDaliKey(builder.url));
+        ImageService.set((ImageView) view, builder.url);
     }
 
     @Override

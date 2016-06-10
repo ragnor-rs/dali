@@ -3,6 +3,7 @@ package io.reist.dali_demo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.util.SparseArray;
 import android.widget.ImageView;
 
@@ -12,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Emulates slow image loading. Runs image load tasks concurrently.
@@ -24,30 +26,23 @@ public class ImageService {
 
     private final static SparseArray<BitmapDrawable> DATA = new SparseArray<>();
 
-    private final static ExecutorService executor = Executors.newFixedThreadPool(5);
+    private final static ExecutorService executor = Executors.newFixedThreadPool(4);
 
     private final static Map<ImageView, Future<?>> taskMap = new ConcurrentHashMap<>();
 
-    public static void set(final ImageView view, int key) {
+    private static final String TAG = ImageService.class.getSimpleName();
+
+    public static void set(final ImageView view, String url) {
+
+        final int key = urlToPosition(url);
 
         BitmapDrawable drawable = DATA.get(key);
+
         if (drawable == null) {
-            drawable = createRandomBitmapDrawable();
-            DATA.put(key, drawable);
+            taskMap.put(view, executor.submit(new Task(key, view)));
+        } else {
+            view.setImageDrawable(drawable);
         }
-
-        final BitmapDrawable finalDrawable = drawable;
-        taskMap.put(view, executor.submit(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(500);
-                    view.setImageDrawable(finalDrawable);
-                } catch (InterruptedException ignored) {}
-            }
-
-        }));
 
     }
 
@@ -66,8 +61,63 @@ public class ImageService {
     public static void cancel(ImageView view) {
         Future<?> future = taskMap.get(view);
         if (future != null) {
+            Log.i(TAG, "Cancelled a task");
             future.cancel(true);
         }
+    }
+
+    public static int urlToPosition(String url) {
+        return Integer.parseInt(url);
+    }
+
+    public static String positionToUrl(int position) {
+        return Integer.toString(position);
+    }
+
+    static class Task implements Runnable {
+
+        private final int key;
+        private final ImageView view;
+
+        Task(int key, ImageView view) {
+            this.key = key;
+            this.view = view;
+        }
+
+        @Override
+        public void run() {
+
+            Log.i(TAG, "Requested a bitmap for key: " + key);
+
+            // look up a bitmap
+            BitmapDrawable drawable = DATA.get(key);
+            if (drawable == null) {
+                drawable = createRandomBitmapDrawable();
+                DATA.put(key, drawable);
+            }
+
+            // emulate long loading
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException ignored) {
+                Log.i(TAG, "Interrupted loading for key: " + key);
+            }
+
+            // set the image
+            final BitmapDrawable finalDrawable = drawable;
+            view.post(new Runnable() {
+
+                @Override
+                public void run() {
+                    view.setImageDrawable(finalDrawable);
+                }
+
+            });
+
+            Log.i(TAG, "Loaded key: " + key);
+
+        }
+
     }
 
 }

@@ -15,13 +15,14 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item, parent, false);
+        LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+        View view = layoutInflater.inflate(R.layout.item, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
-        Dali.load(DaliUtils.toDaliUrl(position)).into(holder.imageView, false);
+        Dali.load(ImageService.positionToUrl(position)).into(holder.imageView, false);
     }
 
     @Override
