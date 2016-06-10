@@ -58,6 +58,10 @@ public class Dali implements ImageLoader {
         return mDeferredImageLoader;
     }
 
+    ImageLoader getMainImageLoader() {
+        return mMainImageLoader;
+    }
+
     /**
      * Used to lazily instantiate Dali in {@link #getInstance()}
      */

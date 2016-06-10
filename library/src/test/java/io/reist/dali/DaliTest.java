@@ -6,11 +6,13 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -37,6 +39,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class DaliTest {
 
     public static final String TEST_URL = "test";
+    public static final String TEST_URL_TRANSFORMED = transformString(TEST_URL);
 
     static {
         Dali.setMainImageLoaderClass(TestImageLoader.class);
@@ -90,6 +93,20 @@ public class DaliTest {
 
     }
 
+    @Test
+    public synchronized void testRequestTransformer() {
+
+        Dali.load(TEST_URL)
+                .defer(false)
+                .transformer(new TestImageTransformer())
+                .into(Mockito.mock(ImageView.class));
+
+        TestImageLoader imageLoader = ((TestImageLoader) Dali.getInstance().getMainImageLoader());
+
+        Assert.assertEquals(TEST_URL_TRANSFORMED, imageLoader.getUrl());
+
+    }
+
     private static void assertDefer(View targetView, boolean shouldCall) {
 
         Dali.load(TEST_URL).defer(true).into(targetView);
@@ -106,8 +123,11 @@ public class DaliTest {
 
     static class TestImageLoader implements ImageLoader {
 
+        private String url;
+
         @Override
         public void load(ImageRequestBuilder builder, View view, boolean background) {
+            this.url = builder.url;
             if (view instanceof ImageView) {
                 ((ImageView) view).setImageDrawable(Mockito.mock(Drawable.class));
             } else {
@@ -117,11 +137,16 @@ public class DaliTest {
 
         @Override
         public void load(ImageRequestBuilder builder, DaliCallback callback, Context context) {
+            this.url = builder.url;
             callback.onImageLoaded(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
         }
 
         @Override
         public void cancel(Object o) {}
+
+        public String getUrl() {
+            return url;
+        }
 
     }
 
@@ -223,6 +248,20 @@ public class DaliTest {
             dummy.setImageDrawable(drawable);
         }
 
+    }
+
+    static class TestImageTransformer implements ImageRequestTransformer {
+
+        @Override
+        public ImageRequestBuilder transform(ImageRequestBuilder imageRequestBuilder) {
+            return imageRequestBuilder.url(transformString(imageRequestBuilder.url));
+        }
+
+    }
+
+    @NonNull
+    static String transformString(String url) {
+        return url.replace('t', 'a');
     }
 
 }
