@@ -22,6 +22,7 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
 
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
+        holder.imageView.setImageResource(android.R.color.black);
         Dali.load(ImageService.positionToUrl(position)).into(holder.imageView, false);
     }
 

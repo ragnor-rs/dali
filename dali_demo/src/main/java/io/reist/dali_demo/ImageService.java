@@ -41,6 +41,7 @@ public class ImageService {
         if (drawable == null) {
             taskMap.put(view, executor.submit(new Task(key, view)));
         } else {
+            Log.i(TAG, "Cache hit: " + url);
             view.setImageDrawable(drawable);
         }
 
@@ -61,7 +62,6 @@ public class ImageService {
     public static void cancel(ImageView view) {
         Future<?> future = taskMap.get(view);
         if (future != null) {
-            Log.d(TAG, "Cancelled a task");
             future.cancel(true);
         }
     }
