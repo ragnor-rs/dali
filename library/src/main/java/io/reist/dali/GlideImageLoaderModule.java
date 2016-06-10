@@ -14,9 +14,9 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
 
 /**
- * Created by Reist on 18.03.16.
+ * The module configures timeouts for {@link GlideImageLoader}.
  */
-public class DaliGlideModule implements GlideModule {
+public class GlideImageLoaderModule implements GlideModule {
 
     public static final int TIMEOUT = 1000;
 
@@ -31,7 +31,11 @@ public class DaliGlideModule implements GlideModule {
                 .readTimeout(TIMEOUT, TimeUnit.MILLISECONDS)
                 .writeTimeout(TIMEOUT, TimeUnit.MILLISECONDS);
 
-        glide.register(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory(clientBuilder.build()));
+        glide.register(
+                GlideUrl.class,
+                InputStream.class,
+                new OkHttpUrlLoader.Factory(clientBuilder.build())
+        );
 
     }
 

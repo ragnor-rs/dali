@@ -12,6 +12,8 @@ import android.os.Build;
 import android.support.v4.content.ContextCompat;
 
 /**
+ * Renders a vector drawable into a common {@link BitmapDrawable}.
+ *
  * Created by Reist on 02.06.16.
  */
 public class BitmapCompat {

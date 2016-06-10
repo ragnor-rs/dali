@@ -10,31 +10,56 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 /**
+ *
+ * DeferredImageLoader doesn't perform actual image loading. It just postpones image request until
+ * a view is measured to take advantage of optimizations of various Dali implementations. For
+ * instance, if a view size is known and this size is relatively small, it's possible to use less
+ * memory by storing only scaled-down instances of images.
+ *
+ * Subclasses must have a constructor with {@link ImageLoader} parameter.
+ *
  * Created by m039 on 12/25/15.
  */
-class DeferredImageLoader implements ImageLoader {
+public class DeferredImageLoader implements ImageLoader {
 
-    DeferredImageLoader() {}
+    private final ImageLoader mainImageLoader;
+
+    /**
+     * @param mainImageLoader       a real loader to use when a target view is measured
+     */
+    DeferredImageLoader(ImageLoader mainImageLoader) {
+        this.mainImageLoader = mainImageLoader;
+    }
 
     /**
      * It's ok that the map is never queried because the loading process starts in
-     * {@link DeferredRequestCreator#DeferredRequestCreator(View, ImageRequestBuilder, boolean)}.
+     * {@link ViewRequestFactory#ViewRequestFactory(View, ImageRequestBuilder, boolean, ImageLoader)}.
      * In here, a pre-draw listener is created. The listener requests an image after the
      * attached {@link ImageView} size has its size calculated.
      */
-    private static final Map<View, DeferredRequestCreator> sTargetToDeferredRequestCreator = new WeakHashMap<>();
+    private final Map<View, ViewRequestFactory> requestMap = new WeakHashMap<>();
 
-    private static class DeferredRequestCreator implements ViewTreeObserver.OnPreDrawListener {
+    static class ViewRequestFactory implements ViewTreeObserver.OnPreDrawListener {
 
         private final ImageRequestBuilder builder;
         private final WeakReference<View> target;
         private final boolean background;
+        private final ImageLoader mainImageLoader;
 
-        DeferredRequestCreator(View target, ImageRequestBuilder builder, boolean background) {
+        ViewRequestFactory(
+                View target,
+                ImageRequestBuilder builder,
+                boolean background,
+                ImageLoader mainImageLoader
+        ) {
+
             this.builder = builder;
             this.target = new WeakReference<>(target);
             this.background = background;
+            this.mainImageLoader = mainImageLoader;
+
             target.getViewTreeObserver().addOnPreDrawListener(this);
+
         }
 
         @Override
@@ -59,30 +84,36 @@ class DeferredImageLoader implements ImageLoader {
                 return true;
             }
 
-            vto.removeOnPreDrawListener(this);
+            mainImageLoader.load(builder, target, background);
 
-            this.builder.defer(false).resize(width, height).into(target, background);
+            vto.removeOnPreDrawListener(this);
 
             return true;
 
         }
 
         void cancel() {
+
             View target = this.target.get();
+
             if (target == null) {
                 return;
             }
+
             ViewTreeObserver vto = target.getViewTreeObserver();
+
             if (!vto.isAlive()) {
                 return;
             }
+
             vto.removeOnPreDrawListener(this);
+
         }
 
     }
 
-    private static void defer(View view, DeferredRequestCreator deferredRequestCreator) {
-        sTargetToDeferredRequestCreator.put(view, deferredRequestCreator);
+    protected void defer(View view, ViewRequestFactory viewRequestFactory) {
+        requestMap.put(view, viewRequestFactory);
     }
 
     @Override
@@ -98,7 +129,7 @@ class DeferredImageLoader implements ImageLoader {
         height = view.getHeight();
 
         if (width <= 0 || height <= 0) {
-            defer(view, new DeferredRequestCreator(view, builder, background));
+            defer(view, new ViewRequestFactory(view, builder, background, mainImageLoader));
         } else {
             builder.resize(width, height).into(view, background);
         }
@@ -114,9 +145,9 @@ class DeferredImageLoader implements ImageLoader {
     public void cancel(Object o) {
         if (o instanceof View) {
             View view = (View) o;
-            DeferredRequestCreator deferredRequestCreator = sTargetToDeferredRequestCreator.remove(view);
-            if (deferredRequestCreator != null) {
-                deferredRequestCreator.cancel();
+            ViewRequestFactory viewRequestFactory = requestMap.remove(view);
+            if (viewRequestFactory != null) {
+                viewRequestFactory.cancel();
             }
         }
     }
