@@ -180,7 +180,7 @@ public class Dali implements ImageLoader {
      */
     @SuppressWarnings("unused")
     public static void setImageFactory(DaliImageFactory daliImageFactory) {
-        throw new UnsupportedOperationException();
+        // todo
     }
 
     /**

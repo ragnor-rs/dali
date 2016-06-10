@@ -24,7 +24,7 @@ public class EndlessImageListAdapter extends RecyclerView.Adapter<EndlessImageLi
 
     @Override
     public int getItemCount() {
-        return Integer.MAX_VALUE;
+        return 1000;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
