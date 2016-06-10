@@ -61,7 +61,7 @@ public class ImageService {
     public static void cancel(ImageView view) {
         Future<?> future = taskMap.get(view);
         if (future != null) {
-            Log.i(TAG, "Cancelled a task");
+            Log.d(TAG, "Cancelled a task");
             future.cancel(true);
         }
     }
@@ -87,7 +87,7 @@ public class ImageService {
         @Override
         public void run() {
 
-            Log.i(TAG, "Requested a bitmap for key: " + key);
+            Log.d(TAG, "Requested a bitmap for key: " + key);
 
             // look up a bitmap
             BitmapDrawable drawable = DATA.get(key);
@@ -100,7 +100,7 @@ public class ImageService {
             try {
                 TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException ignored) {
-                Log.i(TAG, "Interrupted loading for key: " + key);
+                Log.d(TAG, "Interrupted loading for key: " + key);
             }
 
             // set the image
@@ -114,7 +114,7 @@ public class ImageService {
 
             });
 
-            Log.i(TAG, "Loaded key: " + key);
+            Log.d(TAG, "Loaded key: " + key);
 
         }
 
