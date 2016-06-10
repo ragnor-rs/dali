@@ -9,7 +9,7 @@ import android.view.View;
  *
  * Created by m039 on 12/30/15.
  */
-interface ImageLoader {
+public interface ImageLoader {
 
     /**
      * @param builder       a request to use

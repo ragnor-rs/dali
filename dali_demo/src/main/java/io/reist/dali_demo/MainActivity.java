@@ -16,7 +16,7 @@ public class MainActivity extends AppCompatActivity {
             throw new IllegalStateException("Activity layout must contain a recycler view");
         }
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(new EndlessImageListAdapter());
+        recyclerView.setAdapter(new ImageListAdapter());
     }
 
 }
