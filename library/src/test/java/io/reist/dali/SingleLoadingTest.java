@@ -13,6 +13,7 @@ import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -34,14 +35,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Config(
         constants = BuildConfig.class,
         sdk = {Build.VERSION_CODES.JELLY_BEAN},
-        shadows = DaliTest.PreDrawShadowViewTreeObserver.class
+        shadows = SingleLoadingTest.PreDrawShadowViewTreeObserver.class
 )
-public class DaliTest {
+public class SingleLoadingTest {
 
     public static final String TEST_URL = "test";
     public static final String TEST_URL_TRANSFORMED = transformString(TEST_URL);
 
-    static {
+    @BeforeClass
+    public static void init() {
         Dali.setMainImageLoaderClass(TestImageLoader.class);
         Dali.setDeferredImageLoaderClass(TestDeferredImageLoader.class);
     }

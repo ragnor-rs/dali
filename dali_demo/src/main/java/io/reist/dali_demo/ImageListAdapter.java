@@ -4,7 +4,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import io.reist.dali.Dali;
 
@@ -22,8 +21,11 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
 
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
-        holder.imageView.setImageResource(android.R.color.black);
-        Dali.load(ImageService.positionToUrl(position)).into(holder.imageView, false);
+        AdapterImageView imageView = holder.imageView;
+        int adapterPosition = holder.getAdapterPosition();
+        String url = ImageService.positionToUrl(adapterPosition);
+        imageView.setPosition(adapterPosition);
+        Dali.load(url).placeholder(android.R.color.holo_green_dark).into(imageView, false);
     }
 
     @Override
@@ -33,11 +35,11 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        private final ImageView imageView;
+        private final AdapterImageView imageView;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            imageView = (ImageView) itemView.findViewById(R.id.image_view);
+            imageView = (AdapterImageView) itemView.findViewById(R.id.image_view);
         }
 
     }

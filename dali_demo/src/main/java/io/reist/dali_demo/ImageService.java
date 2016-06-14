@@ -2,6 +2,8 @@ package io.reist.dali_demo;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.SparseArray;
@@ -39,17 +41,19 @@ public class ImageService {
         BitmapDrawable drawable = DATA.get(key);
 
         if (drawable == null) {
-            taskMap.put(view, executor.submit(new Task(key, view)));
+            taskMap.put(view, executor.submit(new Task(key, view, handler)));
         } else {
-            Log.i(TAG, "Cache hit: " + url);
+            Log.d(TAG, "Cache hit: " + url);
             view.setImageDrawable(drawable);
+            throw new RuntimeException();
         }
 
     }
 
     @NonNull
     private static BitmapDrawable createRandomBitmapDrawable() {
-        BitmapDrawable drawable;Bitmap bitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.RGB_565);
+        BitmapDrawable drawable;
+        Bitmap bitmap = Bitmap.createBitmap(2, 2, Bitmap.Config.RGB_565);
         for (int i = 0; i < bitmap.getWidth(); i++) {
             for (int j = 0; j < bitmap.getHeight(); j++) {
                 bitmap.setPixel(i, j, RANDOM.nextInt());
@@ -78,16 +82,18 @@ public class ImageService {
 
         private final int key;
         private final ImageView view;
+        private final Handler handler;
 
-        Task(int key, ImageView view) {
+        Task(int key, ImageView view, Handler handler) {
             this.key = key;
             this.view = view;
+            this.handler = handler;
         }
 
         @Override
         public void run() {
 
-            Log.d(TAG, "Requested a bitmap for key: " + key);
+            //Log.d(TAG, "Requested a bitmap for key: " + key);
 
             // look up a bitmap
             BitmapDrawable drawable = DATA.get(key);
@@ -100,24 +106,30 @@ public class ImageService {
             try {
                 TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException ignored) {
-                Log.d(TAG, "Interrupted loading for key: " + key);
+                //Log.d(TAG, "Interrupted loading for key: " + key);
+                return;
             }
 
             // set the image
             final BitmapDrawable finalDrawable = drawable;
-            view.post(new Runnable() {
+            final int finalKey = key;
+            final ImageView finalView = view;
+            handler.post(new Runnable() {
 
                 @Override
                 public void run() {
-                    view.setImageDrawable(finalDrawable);
+                    Log.d(TAG, "Runnable for " + finalKey);
+                    finalView.setImageDrawable(finalDrawable);
                 }
 
             });
 
-            Log.d(TAG, "Loaded key: " + key);
+            //Log.d(TAG, "Loaded key: " + key);
 
         }
 
     }
+
+    private static Handler handler = new Handler(Looper.getMainLooper());
 
 }

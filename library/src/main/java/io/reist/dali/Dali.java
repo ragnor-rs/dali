@@ -99,7 +99,7 @@ public class Dali implements ImageLoader {
             }
 
             if (builder.url == null) {
-                setPlaceholder(builder.placeholderRes, view, background);
+                setDrawable(builder.placeholderRes, view, background);
             } else {
                 mMainImageLoader.load(builder, view, false);
             }
@@ -122,34 +122,34 @@ public class Dali implements ImageLoader {
         }
 
         if (builder.url == null) {
-            setPlaceholder(builder.placeholderRes, callback, context);
+            setDrawable(builder.placeholderRes, callback, context);
         } else {
             mMainImageLoader.load(builder, callback, context);
         }
 
     }
 
-    static void setPlaceholder(@DrawableRes int placeholderRes, DaliCallback callback, Context context) {
-        callback.onImageLoaded(BitmapCompat.toBitmap(context, placeholderRes));
+    static void setDrawable(@DrawableRes int drawableRes, DaliCallback callback, Context context) {
+        callback.onImageLoaded(BitmapCompat.toBitmap(context, drawableRes));
     }
 
-    static void setPlaceholder(@DrawableRes int placeholderRes, View view, boolean background) {
+    static void setDrawable(@DrawableRes int drawableRes, View view, boolean background) {
         if (background) {
 
-            if (placeholderRes == 0) {
+            if (drawableRes == 0) {
                 setBackground(view, null);
             } else {
-                view.setBackgroundResource(placeholderRes);
+                view.setBackgroundResource(drawableRes);
             }
 
         } else {
 
             if (view instanceof ImageView) {
                 ImageView imageView = (ImageView) view;
-                if (placeholderRes == 0) {
+                if (drawableRes == 0) {
                     imageView.setImageDrawable(null);
                 } else {
-                    imageView.setImageResource(placeholderRes);
+                    imageView.setImageResource(drawableRes);
                 }
             } else {
                 throw new UnsupportedOperationException("Cannot set foreground for " + view);

@@ -94,4 +94,10 @@ public class ImageRequestBuilder {
         Dali.getInstance().load(this, callback, context);
     }
 
+    public ImageRequestBuilder targetSize(int w, int h) {
+        targetWidth = w;
+        targetHeight = h;
+        return this;
+    }
+
 }

@@ -120,7 +120,7 @@ public class DeferredImageLoader implements ImageLoader {
     public void load(ImageRequestBuilder builder, View view, boolean background) {
 
         if (builder.placeholderRes != 0) {
-            Dali.setPlaceholder(builder.placeholderRes, view, background);
+            Dali.setDrawable(builder.placeholderRes, view, background);
         }
 
         int width, height;
