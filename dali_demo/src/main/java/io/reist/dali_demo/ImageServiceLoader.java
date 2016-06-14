@@ -31,4 +31,9 @@ public class ImageServiceLoader implements ImageLoader {
         ImageService.cancel((ImageView) o);
     }
 
+    @Override
+    public void cancelAll() {
+        ImageService.cancelAll();
+    }
+
 }

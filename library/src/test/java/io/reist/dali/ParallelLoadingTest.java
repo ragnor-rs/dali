@@ -200,6 +200,11 @@ public class ParallelLoadingTest {
             }
         }
 
+        @Override
+        public void cancelAll() {
+            throw new UnsupportedOperationException();
+        }
+
     }
 
     static class Task implements Runnable {

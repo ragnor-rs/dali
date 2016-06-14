@@ -150,6 +150,14 @@ public class GlideImageLoader implements ImageLoader {
         }
     }
 
+    @Override
+    public void cancelAll() {
+        for (BaseTarget target : targetMap.values()) {
+            Glide.clear(target);
+        }
+        targetMap.clear();
+    }
+
     /**
      * The circle cropping has known issues with cross-fade transitions in Glide v3.
      * Details can be found on Glide GitHub page, section "Rounded images"

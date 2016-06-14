@@ -22,15 +22,6 @@ import java.util.WeakHashMap;
  */
 public class DeferredImageLoader implements ImageLoader {
 
-    private final ImageLoader mainImageLoader;
-
-    /**
-     * @param mainImageLoader       a real loader to use when a target view is measured
-     */
-    public DeferredImageLoader(ImageLoader mainImageLoader) {
-        this.mainImageLoader = mainImageLoader;
-    }
-
     /**
      * It's ok that the map is never queried because the loading process starts in
      * {@link ViewRequestFactory#ViewRequestFactory(View, ImageRequestBuilder, boolean, ImageLoader)}.
@@ -129,7 +120,7 @@ public class DeferredImageLoader implements ImageLoader {
         height = view.getHeight();
 
         if (width <= 0 || height <= 0) {
-            defer(view, new ViewRequestFactory(view, builder, background, mainImageLoader));
+            defer(view, new ViewRequestFactory(view, builder, background, Dali.getInstance().getMainImageLoader()));
         } else {
             builder.resize(width, height).into(view, background);
         }
@@ -150,6 +141,14 @@ public class DeferredImageLoader implements ImageLoader {
                 viewRequestFactory.cancel();
             }
         }
+    }
+
+    @Override
+    public void cancelAll() {
+        for (ViewRequestFactory factory : requestMap.values()) {
+            factory.cancel();
+        }
+        requestMap.clear();
     }
 
 }

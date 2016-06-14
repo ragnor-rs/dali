@@ -146,6 +146,11 @@ public class SingleLoadingTest {
         @Override
         public void cancel(Object o) {}
 
+        @Override
+        public void cancelAll() {
+            throw new UnsupportedOperationException();
+        }
+
         public String getUrl() {
             return url;
         }
@@ -165,13 +170,6 @@ public class SingleLoadingTest {
     static class TestDeferredImageLoader extends DeferredImageLoader {
 
         private final DeferredImageLoader dummy = Mockito.mock(DeferredImageLoader.class);
-
-        /**
-         * @param mainImageLoader a real loader to use when a target view is measured
-         */
-        public TestDeferredImageLoader(ImageLoader mainImageLoader) {
-            super(mainImageLoader);
-        }
 
         @Override
         protected void defer(View view, DeferredImageLoader.ViewRequestFactory viewRequestFactory) {

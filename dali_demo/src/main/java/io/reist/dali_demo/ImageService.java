@@ -45,7 +45,6 @@ public class ImageService {
         } else {
             Log.d(TAG, "Cache hit: " + url);
             view.setImageDrawable(drawable);
-            throw new RuntimeException();
         }
 
     }
@@ -76,6 +75,13 @@ public class ImageService {
 
     public static String positionToUrl(int position) {
         return Integer.toString(position);
+    }
+
+    public static void cancelAll() {
+        for (Future<?> f : taskMap.values()) {
+            f.cancel(true);
+        }
+        taskMap.clear();
     }
 
     static class Task implements Runnable {

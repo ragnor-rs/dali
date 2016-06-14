@@ -8,8 +8,6 @@ import android.support.annotation.DrawableRes;
 import android.view.View;
 import android.widget.ImageView;
 
-import java.lang.reflect.InvocationTargetException;
-
 /**
  * Dali is an abstraction above asynchronous image loading libraries. The default implementation
  * uses {@link GlideImageLoader} which fetches images from the network via Glide library
@@ -23,32 +21,47 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class Dali implements ImageLoader {
 
-    private final ImageLoader mMainImageLoader;
-    private final DeferredImageLoader mDeferredImageLoader;
+    private ImageLoader mMainImageLoader;
+    private DeferredImageLoader mDeferredImageLoader;
+
+    private Dali() {
+        initMainImageLoader(GlideImageLoader.class);
+        initDeferredImageLoader(DeferredImageLoader.class);
+    }
 
     @SuppressWarnings("TryWithIdenticalCatches")
-    private Dali() {
+    private void initDeferredImageLoader(Class<? extends DeferredImageLoader> deferredImageLoaderClass) {
+
+        if (mDeferredImageLoader != null) {
+            mDeferredImageLoader.cancelAll();
+        }
+
         try {
-
-            mMainImageLoader = sMainImageLoaderClass.newInstance();
-
-            mDeferredImageLoader = sDeferredImageLoaderClass
-                    .getConstructor(ImageLoader.class)
-                    .newInstance(mMainImageLoader);
-
+            mDeferredImageLoader = deferredImageLoaderClass.newInstance();
         } catch (InstantiationException e) {
             throw new RuntimeException(e);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException(e);
         }
+
     }
 
-    private static Class<? extends ImageLoader> sMainImageLoaderClass = GlideImageLoader.class;
-    private static Class<? extends DeferredImageLoader> sDeferredImageLoaderClass = DeferredImageLoader.class;
+    @SuppressWarnings("TryWithIdenticalCatches")
+    private void initMainImageLoader(Class<? extends ImageLoader> mainImageLoaderClass) {
+
+        if (mMainImageLoader != null) {
+            mMainImageLoader.cancelAll();
+        }
+
+        try {
+            mMainImageLoader = mainImageLoaderClass.newInstance();
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 
     static Dali getInstance() {
         return SingletonHolder.INSTANCE;
@@ -174,6 +187,12 @@ public class Dali implements ImageLoader {
         mMainImageLoader.cancel(o);
     }
 
+    @Override
+    public void cancelAll() {
+        mDeferredImageLoader.cancelAll();
+        mMainImageLoader.cancelAll();
+    }
+
     /**
      * Changes Dali main loader implementation. This loader will be used for {@link View}s of known
      * dimensions and {@link DaliCallback}.
@@ -183,7 +202,7 @@ public class Dali implements ImageLoader {
      */
     @SuppressWarnings("unused")
     public static void setMainImageLoaderClass(Class<? extends ImageLoader> imageLoaderClass) {
-        sMainImageLoaderClass = imageLoaderClass;
+        getInstance().initMainImageLoader(imageLoaderClass);
     }
 
     /**
@@ -194,7 +213,7 @@ public class Dali implements ImageLoader {
      */
     @SuppressWarnings("unused")
     public static void setDeferredImageLoaderClass(Class<? extends DeferredImageLoader> imageLoaderClass) {
-        sDeferredImageLoaderClass = imageLoaderClass;
+        getInstance().initDeferredImageLoader(imageLoaderClass);
     }
 
 }

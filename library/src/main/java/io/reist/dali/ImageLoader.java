@@ -32,4 +32,9 @@ public interface ImageLoader {
      */
     void cancel(Object o);
 
+    /**
+     * Stops all requests
+     */
+    void cancelAll();
+
 }

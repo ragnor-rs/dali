@@ -10,7 +10,7 @@ import io.reist.dali.Dali;
 /**
  * Created by Reist on 10.06.16.
  */
-public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.ViewHolder> {
+public abstract class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.ViewHolder> {
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -22,11 +22,13 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
         AdapterImageView imageView = holder.imageView;
-        int adapterPosition = holder.getAdapterPosition();
-        String url = ImageService.positionToUrl(adapterPosition);
-        imageView.setPosition(adapterPosition);
+        int i = holder.getAdapterPosition();
+        String url = getUrl(i);
+        imageView.setPosition(i);
         Dali.load(url).placeholder(android.R.color.holo_green_dark).into(imageView, false);
     }
+
+    protected abstract String getUrl(int i);
 
     @Override
     public int getItemCount() {

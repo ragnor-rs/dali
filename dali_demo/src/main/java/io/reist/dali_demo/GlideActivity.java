@@ -4,10 +4,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-public class MainActivity extends DemoActivity {
+import io.reist.dali.GlideImageLoader;
 
-    public MainActivity() {
-        super(ImageServiceLoader.class);
+/**
+ * Created by Reist on 14.06.16.
+ */
+public class GlideActivity extends DemoActivity {
+
+    public GlideActivity() {
+        super(GlideImageLoader.class);
     }
 
     @Override
@@ -15,13 +20,13 @@ public class MainActivity extends DemoActivity {
 
         super.onCreate(savedInstanceState);
 
-        setTitle(R.string.activity_main);
+        setTitle(R.string.activity_glide);
 
         recyclerView.setAdapter(new ImageListAdapter() {
 
             @Override
             protected String getUrl(int i) {
-                return ImageService.positionToUrl(i);
+                return "http://lorempixel.com/500/500/?v=" + Math.random();
             }
 
         });
@@ -30,7 +35,7 @@ public class MainActivity extends DemoActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        startActivity(new Intent(MainActivity.this, GlideActivity.class));
+        startActivity(new Intent(GlideActivity.this, MainActivity.class));
         return true;
     }
 
