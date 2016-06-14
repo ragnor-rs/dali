@@ -66,6 +66,7 @@ public class ImageService {
         Future<?> future = taskMap.get(view);
         if (future != null) {
             future.cancel(true);
+            taskMap.remove(view);
         }
     }
 
