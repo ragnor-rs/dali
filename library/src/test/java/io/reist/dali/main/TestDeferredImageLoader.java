@@ -20,7 +20,7 @@ public class TestDeferredImageLoader extends DeferredImageLoader {
         dummy.defer(view, viewRequestFactory);
     }
 
-    void assertLoadingDeferred(View targetView, boolean shouldCall) {
+    public void assertLoadingDeferred(View targetView, boolean shouldCall) {
         Mockito.verify(
                 ((TestDeferredImageLoader) Dali.getInstance().getDeferredImageLoader()).dummy,
                 Mockito.times(shouldCall ? 1 : 0)
