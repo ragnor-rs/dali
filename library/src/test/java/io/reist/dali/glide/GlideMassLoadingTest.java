@@ -1,4 +1,4 @@
-package io.reist.dali;
+package io.reist.dali.glide;
 
 import android.app.Activity;
 import android.os.Build;
@@ -16,6 +16,15 @@ import org.robolectric.shadows.ShadowLooper;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import io.reist.dali.BuildConfig;
+import io.reist.dali.Dali;
+import io.reist.dali.DeferredImageLoader;
+import io.reist.dali.GlideImageLoader;
+import io.reist.dali.TestImageView;
+import io.reist.dali.TestShadowBitmap;
+import io.reist.dali.TestUtils;
+import io.reist.dali.ViewRecycler;
 
 /**
  * Created by Reist on 14.06.16.
@@ -38,7 +47,7 @@ public class GlideMassLoadingTest {
 
     @BeforeClass
     public static void init() {
-        Dali.setMainImageLoaderClass(TestGlideImageLoader.class);
+        Dali.setMainImageLoaderClass(GlideImageLoader.class);
         Dali.setDeferredImageLoaderClass(DeferredImageLoader.class);
     }
 
@@ -63,14 +72,13 @@ public class GlideMassLoadingTest {
 
             });
 
-            step();
+            TestUtils.advanceMainThread();
 
         }
 
         for (int i = 0; i < 10; i++) {
-            step();
+            TestUtils.advanceMainThread();
         }
-
 
         Assert.assertEquals(
                 "Out of sync",
@@ -80,11 +88,6 @@ public class GlideMassLoadingTest {
 
         assertVisibleImagesLoaded(testActivity, finalRecycler);
 
-    }
-
-    private static void step() {
-        ShadowLooper.idleMainLooper();
-        delay(1);
     }
 
     public static void assertVisibleImagesLoaded(
@@ -104,19 +107,12 @@ public class GlideMassLoadingTest {
 
     }
 
-    static void delay(int seconds) {
-        try {
-            Thread.sleep(seconds * 1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     static class TestActivity extends Activity implements TestImageView.Callback {
 
         /**
          * A number of successful image loads. A successful load results in a loaded image
-         * corresponding to the item. The correspondence is verified via {@link TestImageView#key}.
+         * corresponding to the item. The correspondence is verified via
+         * {@link TestImageView#expectedKey} and {@link TestImageView#actualKey}.
          */
         private volatile int successful;
 
@@ -149,7 +145,7 @@ public class GlideMassLoadingTest {
                 @Override
                 public void bindView(TestImageView testImageView, int i) {
                     testImageView.setExpectedKey(i);
-                    Dali.load(AsyncTestImageLoader.keyToUrl(i))
+                    Dali.load(TestUtils.keyToUrl(i))
                             .placeholder(android.R.color.black)
                             .targetSize(1, 1)
                             .disableTransformation(true)    // to keep bitmap meta data

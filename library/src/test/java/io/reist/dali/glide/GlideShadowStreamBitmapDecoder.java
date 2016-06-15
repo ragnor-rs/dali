@@ -1,4 +1,4 @@
-package io.reist.dali;
+package io.reist.dali.glide;
 
 import android.graphics.Bitmap;
 
@@ -14,6 +14,9 @@ import org.robolectric.internal.ShadowExtractor;
 
 import java.io.InputStream;
 
+import io.reist.dali.TestShadowBitmap;
+import io.reist.dali.TestUtils;
+
 /**
  * Created by Reist on 15.06.16.
  */
@@ -28,7 +31,7 @@ public class GlideShadowStreamBitmapDecoder {
         Object shadow = ShadowExtractor.extract(bitmap);
         if (shadow instanceof TestShadowBitmap) {
             TestShadowBitmap shadowBitmap = (TestShadowBitmap) shadow;
-            int actualKey = AsyncTestImageLoader.urlToKey(model);
+            int actualKey = TestUtils.urlToKey(model);
             shadowBitmap.setActualKey(actualKey);
         }
         System.out.println("decode(" + model + ")");

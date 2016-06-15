@@ -14,7 +14,7 @@ import io.reist.dali.drawables.FadingBitmapDrawable;
 /**
  * Created by Reist on 15.06.16.
  */
-class TestImageView extends ImageView {
+public class TestImageView extends ImageView {
 
     private final Callback callback;
 
@@ -79,7 +79,7 @@ class TestImageView extends ImageView {
         return expectedKey;
     }
 
-    interface Callback {
+    public interface Callback {
         void onSetImageDrawable(int expectedKey, int actualKey);
     }
 

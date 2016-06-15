@@ -1,4 +1,4 @@
-package io.reist.dali;
+package io.reist.dali.glide;
 
 import android.content.Context;
 

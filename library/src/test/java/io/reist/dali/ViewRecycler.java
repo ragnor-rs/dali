@@ -11,7 +11,7 @@ import java.util.List;
  *
  * Created by Reist on 15.06.16.
  */
-class ViewRecycler<V extends View> {
+public class ViewRecycler<V extends View> {
 
     private final int windowHeight;
     private final Adapter<V> adapter;
@@ -20,12 +20,12 @@ class ViewRecycler<V extends View> {
 
     private final List<ViewHolder<V>> viewHolders = new ArrayList<>();
 
-    ViewRecycler(int windowHeight, Adapter<V> adapter) {
+    public ViewRecycler(int windowHeight, Adapter<V> adapter) {
         this.windowHeight = windowHeight;
         this.adapter = adapter;
     }
 
-    void render() {
+    public void render() {
 
         int dataLength = adapter.getCount();
 
@@ -98,7 +98,7 @@ class ViewRecycler<V extends View> {
 
     }
 
-    interface Adapter<V extends View> {
+    public interface Adapter<V extends View> {
 
         int getCount();
 

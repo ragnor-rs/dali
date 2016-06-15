@@ -63,15 +63,15 @@ public class Dali implements ImageLoader {
 
     }
 
-    static Dali getInstance() {
+    public static Dali getInstance() {
         return SingletonHolder.INSTANCE;
     }
 
-    DeferredImageLoader getDeferredImageLoader() {
+    public DeferredImageLoader getDeferredImageLoader() {
         return mDeferredImageLoader;
     }
 
-    ImageLoader getMainImageLoader() {
+    public ImageLoader getMainImageLoader() {
         return mMainImageLoader;
     }
 

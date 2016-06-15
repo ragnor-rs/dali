@@ -1,4 +1,4 @@
-package io.reist.dali;
+package io.reist.dali.main;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -12,7 +12,7 @@ class RunnableQueue {
 
     private final static RunnableQueue INSTANCE = new RunnableQueue();
 
-    public RunnableQueue() {
+    RunnableQueue() {
         (new Thread() {
 
             @Override
@@ -30,11 +30,11 @@ class RunnableQueue {
         }).start();
     }
 
-    public static RunnableQueue getInstance() {
+    static RunnableQueue getInstance() {
         return INSTANCE;
     }
 
-    public void post(Runnable runnable) {
+    void post(Runnable runnable) {
         queue.offer(runnable);
     }
 

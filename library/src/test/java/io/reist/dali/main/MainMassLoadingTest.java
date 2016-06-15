@@ -1,4 +1,4 @@
-package io.reist.dali;
+package io.reist.dali.main;
 
 import android.app.Activity;
 import android.os.Build;
@@ -16,6 +16,13 @@ import org.robolectric.annotation.Config;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import io.reist.dali.BuildConfig;
+import io.reist.dali.Dali;
+import io.reist.dali.DeferredImageLoader;
+import io.reist.dali.TestImageView;
+import io.reist.dali.TestUtils;
+import io.reist.dali.ViewRecycler;
+
 /**
  * Created by Reist on 14.06.16.
  */
@@ -24,7 +31,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
         constants = BuildConfig.class,
         sdk = {Build.VERSION_CODES.JELLY_BEAN}
 )
-public class MassLoadingTest {
+public class MainMassLoadingTest {
 
     public static final int WINDOW_HEIGHT = 5;
     public static final int DATA_SET_LENGTH = 100;
@@ -55,11 +62,11 @@ public class MassLoadingTest {
 
             });
 
-            delay(1);
+            TestUtils.delay(1);
 
         }
 
-        delay(10);
+        TestUtils.delay(10);
 
         Assert.assertEquals(
                 "Out of sync",
@@ -88,19 +95,12 @@ public class MassLoadingTest {
 
     }
 
-    static void delay(int seconds) {
-        try {
-            Thread.sleep(seconds * 1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     static class TestActivity extends Activity implements TestImageView.Callback {
 
         /**
          * A number of successful image loads. A successful load results in a loaded image
-         * corresponding to the item. The correspondence is verified via {@link TestImageView#key}.
+         * corresponding to the item. The correspondence is verified via
+         * {@link TestImageView#expectedKey} and {@link TestImageView#actualKey}.
          */
         private volatile int successful;
 
@@ -133,7 +133,7 @@ public class MassLoadingTest {
                 @Override
                 public void bindView(TestImageView testImageView, int i) {
                     testImageView.setExpectedKey(i);
-                    Dali.load(AsyncTestImageLoader.keyToUrl(i))
+                    Dali.load(TestUtils.keyToUrl(i))
                             .placeholder(android.R.color.black)
                             .targetSize(1, 1)
                             .into(testImageView);

@@ -1,4 +1,4 @@
-package io.reist.dali;
+package io.reist.dali.glide;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -17,6 +17,14 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowLooper;
+
+import io.reist.dali.BuildConfig;
+import io.reist.dali.Dali;
+import io.reist.dali.DaliCallback;
+import io.reist.dali.DeferredImageLoader;
+import io.reist.dali.GlideImageLoader;
+import io.reist.dali.TestImageView;
+import io.reist.dali.TestUtils;
 
 /**
  * Created by Reist on 10.06.16.
@@ -51,11 +59,11 @@ public class GlideSingleLoadingTest {
 
         // load and wait until the request is executed and the result is posted to the main thread
         Dali.load(TEST_URL).defer(false).into(view);
-        MassLoadingTest.delay(3);
+        TestUtils.delay(3);
 
         // process pending results - set the drawable
         ShadowLooper.idleMainLooper();
-        MassLoadingTest.delay(3);
+        TestUtils.delay(3);
 
         view.assertSetDrawableCalled();
 
@@ -68,11 +76,11 @@ public class GlideSingleLoadingTest {
 
         // load and wait until the request is executed and the result is posted to the main thread
         Dali.load(TEST_URL).into(daliCallback, RuntimeEnvironment.application);
-        MassLoadingTest.delay(3);
+        TestUtils.delay(3);
 
         // process pending results - set the drawable
         ShadowLooper.idleMainLooper();
-        MassLoadingTest.delay(3);
+        TestUtils.delay(3);
 
         Mockito.verify(daliCallback).onImageLoaded(Mockito.any(Bitmap.class));
 

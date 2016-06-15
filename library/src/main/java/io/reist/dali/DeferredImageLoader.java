@@ -30,7 +30,7 @@ public class DeferredImageLoader implements ImageLoader {
      */
     private final Map<View, ViewRequestFactory> requestMap = new WeakHashMap<>();
 
-    static class ViewRequestFactory implements ViewTreeObserver.OnPreDrawListener {
+    protected static class ViewRequestFactory implements ViewTreeObserver.OnPreDrawListener {
 
         private final ImageRequestBuilder builder;
         private final WeakReference<View> target;
@@ -103,7 +103,7 @@ public class DeferredImageLoader implements ImageLoader {
 
     }
 
-    protected void defer(View view, ViewRequestFactory viewRequestFactory) {
+    public void defer(View view, ViewRequestFactory viewRequestFactory) {
         requestMap.put(view, viewRequestFactory);
     }
 

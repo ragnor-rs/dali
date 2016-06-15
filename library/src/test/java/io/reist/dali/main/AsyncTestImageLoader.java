@@ -1,4 +1,4 @@
-package io.reist.dali;
+package io.reist.dali.main;
 
 import android.content.Context;
 import android.view.View;
@@ -10,27 +10,25 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import io.reist.dali.DaliCallback;
+import io.reist.dali.ImageLoader;
+import io.reist.dali.ImageRequestBuilder;
+import io.reist.dali.TestImageView;
+import io.reist.dali.TestUtils;
+
 /**
  * Created by Reist on 15.06.16.
  */
-class AsyncTestImageLoader implements ImageLoader {
+public class AsyncTestImageLoader implements ImageLoader {
 
     private final static ExecutorService executor = Executors.newFixedThreadPool(4);
 
     private final static Map<TestImageView, Future<?>> taskMap = new ConcurrentHashMap<>();
 
-    public static String keyToUrl(int i) {
-        return Integer.toString(i);
-    }
-
-    public static int urlToKey(String url) {
-        return Integer.parseInt(url);
-    }
-
     @Override
     public void load(ImageRequestBuilder builder, View view, boolean background) {
         TestImageView imageView = (TestImageView) view;
-        int key = urlToKey(builder.url);
+        int key = TestUtils.urlToKey(builder.url);
         taskMap.put(imageView, executor.submit(new Task(key, imageView)));
         System.out.println("Requested " + key);
     }

@@ -1,6 +1,9 @@
-package io.reist.dali;
+package io.reist.dali.main;
 
 import android.support.annotation.NonNull;
+
+import io.reist.dali.ImageRequestBuilder;
+import io.reist.dali.ImageRequestTransformer;
 
 /**
  * Created by Reist on 15.06.16.

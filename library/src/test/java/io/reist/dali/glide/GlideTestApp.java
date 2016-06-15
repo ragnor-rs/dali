@@ -1,13 +1,15 @@
-package io.reist.dali;
+package io.reist.dali.glide;
 
 import android.app.Application;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 
+import io.reist.dali.GlideImageLoaderModule;
+
 /**
  * Created by Reist on 15.06.16.
  */
-public class GlideTestApp extends Application {
+class GlideTestApp extends Application {
 
     @Override
     public void onCreate() {

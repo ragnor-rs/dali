@@ -1,4 +1,4 @@
-package io.reist.dali;
+package io.reist.dali.main;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -8,10 +8,14 @@ import android.widget.ImageView;
 
 import org.mockito.Mockito;
 
+import io.reist.dali.DaliCallback;
+import io.reist.dali.ImageLoader;
+import io.reist.dali.ImageRequestBuilder;
+
 /**
  * Created by Reist on 15.06.16.
  */
-class SyncTestImageLoader implements ImageLoader {
+public class SyncTestImageLoader implements ImageLoader {
 
     private String url;
 
@@ -37,7 +41,7 @@ class SyncTestImageLoader implements ImageLoader {
     @Override
     public void cancelAll() {}
 
-    public String getUrl() {
+    String getUrl() {
         return url;
     }
 

@@ -1,4 +1,4 @@
-package io.reist.dali;
+package io.reist.dali.main;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -19,6 +19,13 @@ import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import io.reist.dali.BuildConfig;
+import io.reist.dali.Dali;
+import io.reist.dali.DaliCallback;
+import io.reist.dali.DeferredImageLoader;
+import io.reist.dali.ShadowViewTreeObserver;
+import io.reist.dali.TestImageView;
+
 /**
  * Created by Reist on 10.06.16.
  */
@@ -28,7 +35,7 @@ import org.robolectric.annotation.Config;
         sdk = {Build.VERSION_CODES.JELLY_BEAN},
         shadows = ShadowViewTreeObserver.class
 )
-public class SingleLoadingTest {
+public class MainSingleLoadingTest {
 
     public static final String TEST_URL = "test";
     public static final String TEST_URL_TRANSFORMED = TestImageTransformer.transformString(TEST_URL);

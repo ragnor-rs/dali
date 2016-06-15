@@ -1,17 +1,16 @@
-package io.reist.dali;
+package io.reist.dali.glide;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-
-
 /**
  * Created by Reist on 15.06.16.
  */
-public class TestInputStream extends InputStream {
+class TestInputStream extends InputStream {
+
     private final String model;
 
-    public TestInputStream(String model) {
+    TestInputStream(String model) {
         this.model = model;
     }
 
@@ -20,7 +19,8 @@ public class TestInputStream extends InputStream {
         return 0;
     }
 
-    public String getModel() {
+    String getModel() {
         return model;
     }
+
 }
