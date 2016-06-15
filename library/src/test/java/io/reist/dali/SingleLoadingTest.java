@@ -11,21 +11,19 @@ import org.junit.Before;
 import org.junit.Test;
 import org.robolectric.Robolectric;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.shadows.ShadowLooper;
 
 public abstract class SingleLoadingTest {
 
     public static final String TEST_URL = "0";
 
-    private final Object lock = new Object();
+    private MainThread mainThread;
 
     private boolean onSetImageDrawableCalled;
-
-    private volatile boolean locked;
 
     @Before
     public void setUp() {
         onSetImageDrawableCalled = false;
+        mainThread = new MainThread();
     }
 
     @Test
@@ -89,33 +87,15 @@ public abstract class SingleLoadingTest {
     }
 
     public void waitForResult() {
-
-        if (onSetImageDrawableCalled) {
-            return;
+        if (!onSetImageDrawableCalled) {
+            mainThread.loop();
+            Assert.assertTrue("onSetImageDrawable wasn't called", onSetImageDrawableCalled);
         }
-
-        long startTime = System.currentTimeMillis();
-
-        synchronized (lock) {
-            locked = true;
-            while (locked && (System.currentTimeMillis() - startTime) < 3000) {
-                ShadowLooper.idleMainLooper();
-                TestUtils.delay(100);
-            }
-        }
-
-        Assert.assertTrue("onSetImageDrawable wasn't called", onSetImageDrawableCalled);
-
     }
 
     public void notifyAboutResult() {
-
-        synchronized (lock) {
-            locked = false;
-        }
-
+        mainThread.stop();
         onSetImageDrawableCalled = true;
-
     }
 
 }
