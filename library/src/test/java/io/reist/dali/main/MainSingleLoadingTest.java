@@ -10,7 +10,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -56,7 +55,7 @@ public class MainSingleLoadingTest extends SingleLoadingTest {
 
     @Test
     public void testMeasuredImageView() {
-        TestActivity activity = Robolectric.setupActivity(TestActivity.class);
+        TestActivity activity = createActivity();
         ViewGroup rootView = (ViewGroup) activity.findViewById(android.R.id.content);
         assertLoadingDeferred(rootView.getChildAt(0), false);
     }
@@ -64,7 +63,7 @@ public class MainSingleLoadingTest extends SingleLoadingTest {
     @Test
     public void testUnmeasuredImageView() {
 
-        TestActivity activity = Robolectric.setupActivity(TestActivity.class);
+        TestActivity activity = createActivity();
 
         TestImageView targetView = new TestImageView(activity);
 

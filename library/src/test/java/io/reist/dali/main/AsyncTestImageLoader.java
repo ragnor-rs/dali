@@ -118,6 +118,7 @@ public class AsyncTestImageLoader implements ImageLoader {
 
         public void cancel() {
             cancelled = true;
+            System.out.println("cancel req for " + key);
         }
 
     }

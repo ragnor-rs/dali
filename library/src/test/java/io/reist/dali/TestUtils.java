@@ -11,9 +11,9 @@ import org.robolectric.shadows.ShadowLooper;
  */
 public class TestUtils {
 
-    public static void delay(int seconds) {
+    public static void delay(int ms) {
         try {
-            Thread.sleep(seconds * 1000);
+            Thread.sleep(ms);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -21,7 +21,7 @@ public class TestUtils {
 
     public static void advanceMainThread() {
         ShadowLooper.idleMainLooper();
-        delay(1);
+        delay(1000);
     }
 
     public static String keyToUrl(int i) {
