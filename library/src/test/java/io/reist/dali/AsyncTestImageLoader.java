@@ -81,11 +81,12 @@ class AsyncTestImageLoader implements ImageLoader {
             // set the image
             final int finalKey = key;
             final TestImageView finalView = view;
-            ShadowHandler.getInstance().post(new Runnable() {
+            RunnableQueue.getInstance().post(new Runnable() {
 
                 @Override
                 public void run() {
-                    finalView.setImageDrawable(null, finalKey);
+                    finalView.setActualKey(finalKey);
+                    finalView.setImageDrawable(null);
                 }
 
             });

@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowLooper;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -22,16 +23,22 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(
         constants = BuildConfig.class,
-        sdk = {Build.VERSION_CODES.JELLY_BEAN}
+        sdk = {Build.VERSION_CODES.JELLY_BEAN},
+        shadows = {
+                GlideSingleLoadingTest.ShadowNetwork.class,
+                GlideShadowStreamBitmapDecoder.class,
+                TestShadowBitmap.class
+        },
+        application = GlideTestApp.class
 )
-public class MassLoadingTest {
+public class GlideMassLoadingTest {
 
     public static final int WINDOW_HEIGHT = 5;
     public static final int DATA_SET_LENGTH = 100;
 
     @BeforeClass
     public static void init() {
-        Dali.setMainImageLoaderClass(AsyncTestImageLoader.class);
+        Dali.setMainImageLoaderClass(TestGlideImageLoader.class);
         Dali.setDeferredImageLoaderClass(DeferredImageLoader.class);
     }
 
@@ -45,21 +52,25 @@ public class MassLoadingTest {
         for (int i = 0; i < 2; i++) {
 
             final int finalPos = i * WINDOW_HEIGHT;
-            RunnableQueue.getInstance().post(new Runnable() {
+            ShadowLooper.getShadowMainLooper().getScheduler().post(new Runnable() {
 
                 @Override
                 public void run() {
+                    System.out.println("Scrolled to " + finalPos);
                     finalRecycler.setPosition(finalPos);
                     finalRecycler.render();
                 }
 
             });
 
-            delay(1);
+            step();
 
         }
 
-        delay(10);
+        for (int i = 0; i < 10; i++) {
+            step();
+        }
+
 
         Assert.assertEquals(
                 "Out of sync",
@@ -69,6 +80,11 @@ public class MassLoadingTest {
 
         assertVisibleImagesLoaded(testActivity, finalRecycler);
 
+    }
+
+    private static void step() {
+        ShadowLooper.idleMainLooper();
+        delay(1);
     }
 
     public static void assertVisibleImagesLoaded(
@@ -136,6 +152,7 @@ public class MassLoadingTest {
                     Dali.load(AsyncTestImageLoader.keyToUrl(i))
                             .placeholder(android.R.color.black)
                             .targetSize(1, 1)
+                            .disableTransformation(true)    // to keep bitmap meta data
                             .into(testImageView);
                 }
 

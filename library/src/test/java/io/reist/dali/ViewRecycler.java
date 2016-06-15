@@ -11,7 +11,7 @@ import java.util.List;
  *
  * Created by Reist on 15.06.16.
  */
-class ShadowRecycler<V extends View> {
+class ViewRecycler<V extends View> {
 
     private final int windowHeight;
     private final Adapter<V> adapter;
@@ -20,7 +20,7 @@ class ShadowRecycler<V extends View> {
 
     private final List<ViewHolder<V>> viewHolders = new ArrayList<>();
 
-    ShadowRecycler(int windowHeight, Adapter<V> adapter) {
+    ViewRecycler(int windowHeight, Adapter<V> adapter) {
         this.windowHeight = windowHeight;
         this.adapter = adapter;
     }

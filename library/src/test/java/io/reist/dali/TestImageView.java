@@ -1,12 +1,15 @@
 package io.reist.dali;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.ImageView;
 
 import org.mockito.Mockito;
 import org.robolectric.internal.ShadowExtractor;
+
+import io.reist.dali.drawables.FadingBitmapDrawable;
 
 /**
  * Created by Reist on 15.06.16.
@@ -15,7 +18,8 @@ class TestImageView extends ImageView {
 
     private final Callback callback;
 
-    private int key;
+    private int expectedKey = -1;
+    private int actualKey = -1;
 
     public TestImageView(Context context) {
         this(context, null);
@@ -26,21 +30,24 @@ class TestImageView extends ImageView {
         this.callback = callback;
     }
 
-    public void setKey(int key) {
-        this.key = key;
-    }
-
-    public void setImageDrawable(Drawable drawable, int requestKey) {
-        System.out.println(this + ".setImageDrawable @ " + key + ", " + requestKey);
-        setImageDrawable(drawable);
-        if (callback != null) {
-            callback.onSetImageDrawable(key, requestKey);
-        }
+    public void setExpectedKey(int key) {
+        this.expectedKey = key;
     }
 
     @Override
     public void setImageDrawable(Drawable drawable) {
         super.setImageDrawable(drawable);
+        if (actualKey == -1 && drawable instanceof FadingBitmapDrawable) {
+            Bitmap bitmap = ((FadingBitmapDrawable) drawable).getBitmap();
+            Object shadow = ShadowExtractor.extract(bitmap);
+            if (shadow instanceof TestShadowBitmap) {
+                TestShadowBitmap shadowBitmap = (TestShadowBitmap) shadow;
+                actualKey = shadowBitmap.getActualKey();
+            }
+        }
+        if (callback != null) {
+            callback.onSetImageDrawable(expectedKey, actualKey);
+        }
         dummy.setImageDrawable(drawable);
     }
 
@@ -57,11 +64,23 @@ class TestImageView extends ImageView {
         ShadowViewTreeObserver viewTreeObserver =
                 (ShadowViewTreeObserver) ShadowExtractor.extract(getViewTreeObserver());
         viewTreeObserver.fireOnPreDrawListeners();
-        Mockito.verify(dummy, Mockito.times(1)).setImageDrawable(Mockito.any(Drawable.class));
+        assertSetDrawableCalled();
+    }
+
+    public void assertSetDrawableCalled() {
+        Mockito.verify(dummy).setImageDrawable(Mockito.any(Drawable.class));
+    }
+
+    public void setActualKey(int actualKey) {
+        this.actualKey = actualKey;
+    }
+
+    public int getExpectedKey() {
+        return expectedKey;
     }
 
     interface Callback {
-        void onSetImageDrawable(int actualKey, int expectedKey);
+        void onSetImageDrawable(int expectedKey, int actualKey);
     }
 
     private final ImageView dummy = Mockito.mock(ImageView.class);

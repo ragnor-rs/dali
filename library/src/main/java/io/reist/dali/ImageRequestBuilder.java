@@ -23,6 +23,7 @@ public class ImageRequestBuilder {
     public Bitmap.Config config;
     public @DrawableRes int placeholderRes;
     public boolean blur = false;
+    public boolean disableTransformation;
 
     ImageRequestBuilder() {}
 
@@ -97,6 +98,12 @@ public class ImageRequestBuilder {
     public ImageRequestBuilder targetSize(int w, int h) {
         targetWidth = w;
         targetHeight = h;
+        return this;
+    }
+
+    @SuppressWarnings("unused")
+    public ImageRequestBuilder disableTransformation(boolean disableTransformation) {
+        this.disableTransformation = disableTransformation;
         return this;
     }
 

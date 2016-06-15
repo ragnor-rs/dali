@@ -51,7 +51,7 @@ public class GlideImageLoader implements ImageLoader {
     public static final int BLUR_RADIUS = 8;
     public static final int BLUR_SAMPLING = 16;
 
-    private final Map<Object, BaseTarget> targetMap = new WeakHashMap<>();
+    final Map<Object, BaseTarget> targetMap = new WeakHashMap<>();
 
     @Override
     public void load(ImageRequestBuilder builder, View view, boolean background) {
@@ -85,11 +85,6 @@ public class GlideImageLoader implements ImageLoader {
     @NonNull
     private BitmapTypeRequest createBitmapTypeRequest(Object o, ImageRequestBuilder builder, Context context) {
 
-        // cancel previous request
-        cancel(o);
-
-        // create a new one
-
         final RequestManager requestManager = Glide.with(context);
 
         BitmapTypeRequest bitmapTypeRequest = requestManager.load(builder.url).asBitmap();
@@ -102,7 +97,9 @@ public class GlideImageLoader implements ImageLoader {
             bitmapTypeRequest.override(builder.targetWidth, builder.targetHeight);
         }
 
-        if (builder.blur) {
+        if (builder.disableTransformation) {
+            // do nothing
+        } else if (builder.blur) {
             bitmapTypeRequest.transform(
                     new OnlyScaleDownTransformation(context, builder.centerCrop),
                     new BlurTransformation(context, BLUR_RADIUS, BLUR_SAMPLING)
@@ -179,9 +176,7 @@ public class GlideImageLoader implements ImageLoader {
         }
 
         @Override
-        public void onLoadStarted(Drawable placeholder) {
-            setDrawable(placeholder);
-        }
+        public void onLoadStarted(Drawable placeholder) {}
 
         private void setDrawable(Drawable drawable) {
             if (background) {

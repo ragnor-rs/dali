@@ -6,13 +6,13 @@ import java.util.concurrent.BlockingQueue;
 /**
  * Emulates {@link android.os.Handler}.
  */
-class ShadowHandler {
+class RunnableQueue {
 
     private final BlockingQueue<Runnable> queue = new ArrayBlockingQueue<>(16);
 
-    private final static ShadowHandler INSTANCE = new ShadowHandler();
+    private final static RunnableQueue INSTANCE = new RunnableQueue();
 
-    public ShadowHandler() {
+    public RunnableQueue() {
         (new Thread() {
 
             @Override
@@ -30,7 +30,7 @@ class ShadowHandler {
         }).start();
     }
 
-    public static ShadowHandler getInstance() {
+    public static RunnableQueue getInstance() {
         return INSTANCE;
     }
 
