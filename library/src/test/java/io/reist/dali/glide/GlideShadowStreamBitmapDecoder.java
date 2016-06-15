@@ -10,11 +10,9 @@ import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.internal.ShadowExtractor;
 
 import java.io.InputStream;
 
-import io.reist.dali.TestShadowBitmap;
 import io.reist.dali.TestUtils;
 
 /**
@@ -26,15 +24,8 @@ public class GlideShadowStreamBitmapDecoder {
     @SuppressWarnings("unused")
     @Implementation
     public Resource<Bitmap> decode(InputStream source, int width, int height) {
-        Bitmap bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565);
         String model = ((TestInputStream) source).getModel();
-        Object shadow = ShadowExtractor.extract(bitmap);
-        if (shadow instanceof TestShadowBitmap) {
-            TestShadowBitmap shadowBitmap = (TestShadowBitmap) shadow;
-            int actualKey = TestUtils.urlToKey(model);
-            shadowBitmap.setActualKey(actualKey);
-        }
-        System.out.println("decode(" + model + ")");
+        Bitmap bitmap = TestUtils.decode(TestUtils.urlToKey(model));
         return BitmapResource.obtain(
                 bitmap,
                 Glide.get(RuntimeEnvironment.application).getBitmapPool()

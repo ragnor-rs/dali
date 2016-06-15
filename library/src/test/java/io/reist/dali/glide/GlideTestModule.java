@@ -53,7 +53,6 @@ public class GlideTestModule implements GlideModule {
 
                             @Override
                             public DataFetcher<InputStream> getResourceFetcher(final String model, int width, int height) {
-                                System.out.println("getResourceFetcher(" + model + ")");
                                 return new DataFetcher<InputStream>() {
 
                                     @Override

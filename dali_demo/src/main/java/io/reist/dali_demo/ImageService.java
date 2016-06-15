@@ -14,7 +14,6 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -30,7 +29,7 @@ public class ImageService {
 
     private final static ExecutorService executor = Executors.newFixedThreadPool(4);
 
-    private final static Map<ImageView, Future<?>> taskMap = new ConcurrentHashMap<>();
+    private final static Map<ImageView, Task> taskMap = new ConcurrentHashMap<>();
 
     private static final String TAG = ImageService.class.getSimpleName();
 
@@ -41,7 +40,9 @@ public class ImageService {
         BitmapDrawable drawable = DATA.get(key);
 
         if (drawable == null) {
-            taskMap.put(view, executor.submit(new Task(key, view, handler)));
+            Task task = new Task(key, view);
+            executor.submit(task);
+            taskMap.put(view, task);
         } else {
             Log.d(TAG, "Cache hit: " + url);
             view.setImageDrawable(drawable);
@@ -63,10 +64,9 @@ public class ImageService {
     }
 
     public static void cancel(ImageView view) {
-        Future<?> future = taskMap.get(view);
-        if (future != null) {
-            future.cancel(true);
-            taskMap.remove(view);
+        Task task = taskMap.get(view);
+        if (task != null) {
+            task.cancel();
         }
     }
 
@@ -79,64 +79,82 @@ public class ImageService {
     }
 
     public static void cancelAll() {
-        for (Future<?> f : taskMap.values()) {
-            f.cancel(true);
+        for (Task task : taskMap.values()) {
+            task.cancel();
         }
-        taskMap.clear();
     }
 
     static class Task implements Runnable {
 
         private final int key;
         private final ImageView view;
-        private final Handler handler;
 
-        Task(int key, ImageView view, Handler handler) {
+        private volatile boolean cancelled;
+
+        Task(int key, ImageView view) {
             this.key = key;
             this.view = view;
-            this.handler = handler;
         }
 
         @Override
         public void run() {
 
-            //Log.d(TAG, "Requested a bitmap for key: " + key);
+            try {
 
-            // look up a bitmap
+                // look up a bitmap
+                final BitmapDrawable drawable = decode(key);
+
+                // emulate long loading
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException ignored) {}
+
+                if (cancelled) {
+                    System.out.println("cancel done for " + key);
+                    return;
+                }
+
+                // set the image
+                final Task parent = this;
+                HANDLER.post(new Runnable() {
+
+                    @Override
+                    public void run() {
+
+                        if (parent.cancelled) {
+                            System.out.println("cancel done for " + parent.key);
+                            return;
+                        }
+
+                        parent.view.setImageDrawable(drawable);
+
+                    }
+
+                });
+
+            } finally {
+                taskMap.remove(view);
+            }
+
+        }
+
+        public void cancel() {
+            cancelled = true;
+        }
+
+        @NonNull
+        public static BitmapDrawable decode(int key) {
             BitmapDrawable drawable = DATA.get(key);
             if (drawable == null) {
                 drawable = createRandomBitmapDrawable();
                 DATA.put(key, drawable);
             }
-
-            // emulate long loading
-            try {
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException ignored) {
-                //Log.d(TAG, "Interrupted loading for key: " + key);
-                return;
-            }
-
-            // set the image
-            final BitmapDrawable finalDrawable = drawable;
-            final int finalKey = key;
-            final ImageView finalView = view;
-            handler.post(new Runnable() {
-
-                @Override
-                public void run() {
-                    Log.d(TAG, "Runnable for " + finalKey);
-                    finalView.setImageDrawable(finalDrawable);
-                }
-
-            });
-
-            //Log.d(TAG, "Loaded key: " + key);
-
+            System.out.println("decode(" + key + ")");
+            return drawable;
         }
 
     }
 
-    private static Handler handler = new Handler(Looper.getMainLooper());
+    private static final Handler HANDLER = new Handler(Looper.getMainLooper());
 
 }

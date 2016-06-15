@@ -13,7 +13,7 @@ import org.robolectric.shadows.ShadowLooper;
 
 public abstract class SingleLoadingTest {
 
-    public static final String TEST_URL = "test";
+    public static final String TEST_URL = "0";
 
     @Test
     public void testLoadIntoImageView() {

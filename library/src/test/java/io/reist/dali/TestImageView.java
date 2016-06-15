@@ -2,14 +2,13 @@ package io.reist.dali;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.ImageView;
 
 import org.mockito.Mockito;
 import org.robolectric.internal.ShadowExtractor;
-
-import io.reist.dali.drawables.FadingBitmapDrawable;
 
 /**
  * Created by Reist on 15.06.16.
@@ -19,7 +18,6 @@ public class TestImageView extends ImageView {
     private final Callback callback;
 
     private int expectedKey = -1;
-    private int actualKey = -1;
 
     public TestImageView(Context context) {
         this(context, null);
@@ -30,15 +28,12 @@ public class TestImageView extends ImageView {
         this.callback = callback;
     }
 
-    public void setExpectedKey(int key) {
-        this.expectedKey = key;
-    }
-
     @Override
     public void setImageDrawable(Drawable drawable) {
         super.setImageDrawable(drawable);
-        if (actualKey == -1 && drawable instanceof FadingBitmapDrawable) {
-            Bitmap bitmap = ((FadingBitmapDrawable) drawable).getBitmap();
+        int actualKey = -1;
+        if (drawable instanceof BitmapDrawable) {
+            Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
             Object shadow = ShadowExtractor.extract(bitmap);
             if (shadow instanceof TestShadowBitmap) {
                 TestShadowBitmap shadowBitmap = (TestShadowBitmap) shadow;
@@ -71,8 +66,8 @@ public class TestImageView extends ImageView {
         Mockito.verify(dummy).setImageDrawable(Mockito.any(Drawable.class));
     }
 
-    public void setActualKey(int actualKey) {
-        this.actualKey = actualKey;
+    public void setExpectedKey(int expectedKey) {
+        this.expectedKey = expectedKey;
     }
 
     public int getExpectedKey() {

@@ -1,5 +1,9 @@
 package io.reist.dali;
 
+import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
+
+import org.robolectric.internal.ShadowExtractor;
 import org.robolectric.shadows.ShadowLooper;
 
 /**
@@ -26,6 +30,18 @@ public class TestUtils {
 
     public static int urlToKey(String url) {
         return Integer.parseInt(url);
+    }
+
+    @NonNull
+    public static Bitmap decode(int key) {
+        Bitmap bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565);
+        Object shadow = ShadowExtractor.extract(bitmap);
+        if (shadow instanceof TestShadowBitmap) {
+            TestShadowBitmap shadowBitmap = (TestShadowBitmap) shadow;
+            shadowBitmap.setActualKey(key);
+        }
+        System.out.println("decode(" + key + ")");
+        return bitmap;
     }
 
 }

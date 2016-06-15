@@ -1,13 +1,16 @@
 package io.reist.dali.main;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.view.View;
+
+import org.robolectric.shadows.ShadowLooper;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import io.reist.dali.DaliCallback;
@@ -23,14 +26,15 @@ public class AsyncTestImageLoader implements ImageLoader {
 
     private final static ExecutorService executor = Executors.newFixedThreadPool(4);
 
-    private final static Map<TestImageView, Future<?>> taskMap = new ConcurrentHashMap<>();
+    private final static Map<TestImageView, Task> taskMap = new ConcurrentHashMap<>();
 
     @Override
     public void load(ImageRequestBuilder builder, View view, boolean background) {
         TestImageView imageView = (TestImageView) view;
         int key = TestUtils.urlToKey(builder.url);
-        taskMap.put(imageView, executor.submit(new Task(key, imageView)));
-        System.out.println("Requested " + key);
+        Task task = new Task(key, imageView);
+        executor.submit(task);
+        taskMap.put(imageView, task);
     }
 
     @Override
@@ -41,10 +45,9 @@ public class AsyncTestImageLoader implements ImageLoader {
     @SuppressWarnings("SuspiciousMethodCalls")
     @Override
     public void cancel(Object o) {
-        Future<?> future = taskMap.get(o);
-        if (future != null) {
-            future.cancel(true);
-            taskMap.remove(o);
+        Task task = taskMap.get(o);
+        if (task != null) {
+            task.cancel();
         }
     }
 
@@ -61,6 +64,8 @@ public class AsyncTestImageLoader implements ImageLoader {
         private final int key;
         private final TestImageView view;
 
+        private volatile boolean cancelled;
+
         Task(int key, TestImageView view) {
             this.key = key;
             this.view = view;
@@ -69,26 +74,50 @@ public class AsyncTestImageLoader implements ImageLoader {
         @Override
         public void run() {
 
-            // emulate long loading
             try {
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException ignored) {
-                return;
-            }
 
-            // set the image
-            final int finalKey = key;
-            final TestImageView finalView = view;
-            RunnableQueue.getInstance().post(new Runnable() {
+                // look up a bitmap
+                final Bitmap bitmap = TestUtils.decode(key);
 
-                @Override
-                public void run() {
-                    finalView.setActualKey(finalKey);
-                    finalView.setImageDrawable(null);
+                // emulate long loading
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException ignored) {}
+
+                if (cancelled) {
+                    System.out.println("cancel done for " + key);
+                    return;
                 }
 
-            });
+                // set the image
+                final Task parent = this;
+                ShadowLooper.getShadowMainLooper().getScheduler().post(new Runnable() {
 
+                    @Override
+                    public void run() {
+
+                        if (parent.cancelled) {
+                            System.out.println("cancel done for " + parent.key);
+                            return;
+                        }
+
+                        parent.view.setImageDrawable(new BitmapDrawable(
+                                null,
+                                bitmap
+                        ));
+
+                    }
+
+                });
+
+            } finally {
+                taskMap.remove(view);
+            }
+
+        }
+
+        public void cancel() {
+            cancelled = true;
         }
 
     }
