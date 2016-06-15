@@ -111,7 +111,7 @@ public abstract class SingleLoadingTest {
     public void notifyAboutResult() {
 
         synchronized (lock) {
-            lock.notify();
+            locked = false;
         }
 
         onSetImageDrawableCalled = true;
