@@ -1,13 +1,13 @@
 package io.reist.dali;
 
 /**
- * Created by m039 on 12/30/15.
+ * Implement this to transform incoming requests.
  */
-public interface ImageTransformer {
+public interface ImageRequestTransformer {
 
     ImageRequestBuilder transform(ImageRequestBuilder imageRequestBuilder);
 
-    ImageTransformer IDENTITY = new ImageTransformer() {
+    ImageRequestTransformer IDENTITY = new ImageRequestTransformer() {
 
         @Override
         public ImageRequestBuilder transform(ImageRequestBuilder imageRequestBuilder) {
