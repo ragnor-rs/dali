@@ -11,17 +11,11 @@ android {
     buildToolsVersion "24"
 
     defaultConfig {
-
         applicationId "io.reist.dali_demo"
         minSdkVersion 16
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
-
-        jackOptions {
-            enabled true
-        }
-
     }
 
     buildTypes {
