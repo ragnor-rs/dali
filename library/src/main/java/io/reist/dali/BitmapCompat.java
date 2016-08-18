@@ -12,17 +12,19 @@ import android.os.Build;
 import android.support.v4.content.ContextCompat;
 
 /**
+ * Renders a vector drawable into a common {@link BitmapDrawable}.
+ *
  * Created by Reist on 02.06.16.
  */
 public class BitmapCompat {
 
-    public static final DrawableToBitmap IMPL;
+    public static final BitmapCompatApi IMPL;
 
     static {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            IMPL = new DrawableToBitmap21();
+            IMPL = new BitmapCompat21();
         } else {
-            IMPL = new DrawableToBitmapBase();
+            IMPL = new BitmapCompatBase();
         }
     }
 
@@ -37,11 +39,11 @@ public class BitmapCompat {
         return IMPL.toBitmap(ContextCompat.getDrawable(context, drawableId));
     }
 
-    interface DrawableToBitmap {
+    interface BitmapCompatApi {
         Bitmap toBitmap(Drawable drawable);
     }
 
-    private static class DrawableToBitmap21 implements DrawableToBitmap {
+    private static class BitmapCompat21 implements BitmapCompatApi {
 
         @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         @Override
@@ -66,7 +68,7 @@ public class BitmapCompat {
 
     }
 
-    private static class DrawableToBitmapBase implements DrawableToBitmap {
+    private static class BitmapCompatBase implements BitmapCompatApi {
 
         @Override
         public Bitmap toBitmap(Drawable drawable) {
