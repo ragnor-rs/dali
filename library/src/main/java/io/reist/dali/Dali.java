@@ -103,20 +103,18 @@ public class Dali implements ImageLoader {
 
         cancel(view);
 
+        if (builder.transformer != null) {
+            builder = builder.transformer.transform(builder);
+        }
+
         if (builder.defer && (builder.targetWidth <= 0 || builder.targetHeight <= 0)) {
             mDeferredImageLoader.load(builder, view, background);
         } else {
-
-            if (builder.transformer != null) {
-                builder = builder.transformer.transform(builder);
-            }
-
             if (builder.url == null) {
                 setDrawable(builder.placeholderRes, view, background);
             } else {
                 mMainImageLoader.load(builder, view, background);
             }
-
         }
 
     }
