@@ -9,6 +9,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Build;
+import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v4.content.ContextCompat;
 
 /**
@@ -31,12 +32,18 @@ public class BitmapCompat {
     /**
      * Converts the given drawable resource to a bitmap representation. Unlike
      * {@link android.graphics.BitmapFactory#decodeResource(Resources, int)}, this method is
-     * capable of rasterizing {@link VectorDrawable}s on devices with API level above or equal to
+     * capable of handling {@link VectorDrawable}s on devices with API level above or equal to
      * {@link android.os.Build.VERSION_CODES#LOLLIPOP}. On older devices, the method may throw
      * {@link IllegalAccessException} if the specified drawable is not a {@link BitmapDrawable}.
      */
     public static Bitmap toBitmap(Context context, int drawableId) {
-        return IMPL.toBitmap(ContextCompat.getDrawable(context, drawableId));
+        Drawable drawable;
+        try {
+            drawable = ContextCompat.getDrawable(context, drawableId);
+        } catch (android.content.res.Resources.NotFoundException exception) {
+            drawable = VectorDrawableCompat.create(context.getResources(), drawableId, null);
+        }
+        return IMPL.toBitmap(drawable);
     }
 
     interface BitmapCompatApi {
@@ -75,7 +82,14 @@ public class BitmapCompat {
             if (drawable instanceof BitmapDrawable) {
                 return ((BitmapDrawable) drawable).getBitmap();
             }  else {
-                throw new IllegalArgumentException("Unsupported drawable: " + drawable);
+                Bitmap bitmap = Bitmap.createBitmap(
+                        drawable.getIntrinsicWidth(),
+                        drawable.getIntrinsicHeight(),
+                        Bitmap.Config.RGB_565
+                );
+                Canvas canvas = new Canvas(bitmap);
+                drawable.draw(canvas);
+                return bitmap;
             }
         }
 
