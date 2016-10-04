@@ -19,7 +19,7 @@ import android.support.v4.content.ContextCompat;
  */
 public class BitmapCompat {
 
-    public static final BitmapCompatApi IMPL;
+    private static final BitmapCompatApi IMPL;
 
     static {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -37,13 +37,18 @@ public class BitmapCompat {
      * {@link IllegalAccessException} if the specified drawable is not a {@link BitmapDrawable}.
      */
     public static Bitmap toBitmap(Context context, int drawableId) {
+        Drawable drawable = getDrawable(context, drawableId);
+        return IMPL.toBitmap(drawable);
+    }
+
+    public static Drawable getDrawable(Context context, int drawableId) {
         Drawable drawable;
         try {
             drawable = ContextCompat.getDrawable(context, drawableId);
-        } catch (android.content.res.Resources.NotFoundException exception) {
+        } catch (Resources.NotFoundException exception) {
             drawable = VectorDrawableCompat.create(context.getResources(), drawableId, null);
         }
-        return IMPL.toBitmap(drawable);
+        return drawable;
     }
 
     interface BitmapCompatApi {
