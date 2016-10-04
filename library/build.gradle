@@ -4,6 +4,7 @@ repositories {
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
 
 android {
 
@@ -55,4 +56,14 @@ dependencies {
     testCompile "org.robolectric:robolectric:3.1"
     testCompile "org.robolectric:shadows-support-v4:3.1"
 
+}
+
+// build a jar with source files
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+artifacts {
+    archives sourcesJar
 }
