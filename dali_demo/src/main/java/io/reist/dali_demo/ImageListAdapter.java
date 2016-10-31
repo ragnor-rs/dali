@@ -25,7 +25,10 @@ public abstract class ImageListAdapter extends RecyclerView.Adapter<ImageListAda
         int i = holder.getAdapterPosition();
         String url = getUrl(i);
         imageView.setPosition(i);
-        Dali.load(url).placeholder(android.R.color.holo_green_dark).into(imageView, false);
+        Dali.load(url)
+                .placeholder(android.R.color.holo_green_dark)
+                .inCircle(true)
+                .into(imageView, false);
     }
 
     protected abstract String getUrl(int i);

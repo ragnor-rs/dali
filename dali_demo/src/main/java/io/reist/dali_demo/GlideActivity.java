@@ -3,6 +3,7 @@ package io.reist.dali_demo;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 
 import io.reist.dali.GlideImageLoader;
 
@@ -26,10 +27,12 @@ public class GlideActivity extends DemoActivity {
 
             @Override
             protected String getUrl(int i) {
-                return "http://lorempixel.com/500/500/?v=" + Math.random();
+                return "https://www.petfinder.com/wp-content/uploads/2012/11/140272627-grooming-needs-senior-cat-632x475.jpg";
             }
 
         });
+
+        recyclerView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
     }
 

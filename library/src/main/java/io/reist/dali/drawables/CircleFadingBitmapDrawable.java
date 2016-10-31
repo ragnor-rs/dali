@@ -32,9 +32,11 @@ public class CircleFadingBitmapDrawable extends FadingBitmapDrawable {
     private final Matrix mShaderMatrix = new Matrix();
     private final Matrix mInverseMatrix = new Matrix();
 
-    private final Rect mClipBounds = new Rect();
-    private float mClipBoundsWidth = -1;
-    private float mClipBoundsHeight = -1;
+    private Rect mClipBounds = new Rect();
+
+    private float mWidth = -1;
+    private float mHeight = -1;
+
     private float mCx;
     private float mCy;
     private float mR;
@@ -95,10 +97,10 @@ public class CircleFadingBitmapDrawable extends FadingBitmapDrawable {
 
         canvas.getClipBounds(mClipBounds);
 
-        float width = mClipBounds.width();
-        float height = mClipBounds.height();
+        float width = getIntrinsicWidth();
+        float height = getIntrinsicHeight();
 
-        if (mClipBoundsWidth != width || mClipBoundsHeight != height) {
+        if (this.mWidth != width || mHeight != height) {
 
             float scale;
             float dx = 0;
@@ -123,8 +125,8 @@ public class CircleFadingBitmapDrawable extends FadingBitmapDrawable {
             mCy = height / 2.0f;
             mR = Math.min(mCx, mCy);
 
-            mClipBoundsWidth = width;
-            mClipBoundsHeight = height;
+            mWidth = width;
+            mHeight = height;
 
         }
 
@@ -134,8 +136,6 @@ public class CircleFadingBitmapDrawable extends FadingBitmapDrawable {
     protected void drawPlaceholder(Canvas canvas, Drawable placeholder, float normalized) {
 
         canvas.save();
-
-        canvas.getClipBounds(mClipBounds);
 
         // placeholders must be circles, not ovals
         float scaleX, scaleY;
@@ -152,6 +152,12 @@ public class CircleFadingBitmapDrawable extends FadingBitmapDrawable {
 
         canvas.restore();
 
+    }
+
+    @Override
+    protected void onBoundsChange(Rect bounds) {
+        super.onBoundsChange(bounds);
+        mClipBounds = bounds;
     }
 
 }
