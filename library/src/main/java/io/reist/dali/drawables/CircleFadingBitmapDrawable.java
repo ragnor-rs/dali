@@ -73,7 +73,7 @@ public class CircleFadingBitmapDrawable extends FadingBitmapDrawable {
             }
         }
 
-        updateShaderMatrix(canvas);
+        updateShaderMatrix();
 
         mBitmapPaint.setAlpha((int) (0xFF * normalized));
 
@@ -93,14 +93,12 @@ public class CircleFadingBitmapDrawable extends FadingBitmapDrawable {
         }
     }
 
-    private void updateShaderMatrix(Canvas canvas) {
-
-        canvas.getClipBounds(mClipBounds);
+    private void updateShaderMatrix() {
 
         float width = getIntrinsicWidth();
         float height = getIntrinsicHeight();
 
-        if (this.mWidth != width || mHeight != height) {
+        if (mWidth != width || mHeight != height) {
 
             float scale;
             float dx = 0;
