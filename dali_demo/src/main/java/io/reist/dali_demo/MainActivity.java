@@ -17,7 +17,7 @@ public class MainActivity extends DemoActivity {
 
         setTitle(R.string.activity_main);
 
-        recyclerView.setAdapter(new ImageListAdapter() {
+        recyclerView.setAdapter(new ImageListAdapter(R.layout.item) {
 
             @Override
             protected String getUrl(int i) {

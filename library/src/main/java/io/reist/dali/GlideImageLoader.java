@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.view.View;
-import android.widget.ImageView;
 
 import com.bumptech.glide.BitmapTypeRequest;
 import com.bumptech.glide.Glide;
@@ -26,9 +25,13 @@ import com.bumptech.glide.request.target.ViewTarget;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import io.reist.dali.drawables.CircleFadingBitmapDrawable;
-import io.reist.dali.drawables.FadingBitmapDrawable;
+import io.reist.dali.drawables.CircleFadingDaliDrawable;
+import io.reist.dali.drawables.DaliDrawable;
+import io.reist.dali.drawables.FadingDaliDrawable;
 import jp.wasabeef.glide.transformations.BlurTransformation;
+
+import static io.reist.dali.DaliUtils.setBackground;
+import static io.reist.dali.DaliUtils.setDrawable;
 
 /**
  * A loader which uses Glide library to asynchronously load images from the network.
@@ -51,7 +54,7 @@ public class GlideImageLoader implements ImageLoader {
     public static final int BLUR_RADIUS = 8;
     public static final int BLUR_SAMPLING = 16;
 
-    final Map<Object, BaseTarget> targetMap = new WeakHashMap<>();
+    private final Map<Object, BaseTarget> targetMap = new WeakHashMap<>();
 
     @Override
     public void load(ImageRequestBuilder builder, View view, boolean background) {
@@ -178,46 +181,35 @@ public class GlideImageLoader implements ImageLoader {
         @Override
         public void onLoadStarted(Drawable placeholder) {}
 
-        private void setDrawable(Drawable drawable) {
-            if (background) {
-                Dali.setBackground(view, drawable);
-            } else {
-                if (view instanceof ImageView) {
-                    ((ImageView) view).setImageDrawable(drawable);
-                } else {
-                    throw new UnsupportedOperationException("Cannot set foreground for " + view);
-                }
-            }
-        }
-
-        private Drawable getDrawable() {
-            if (background) {
-                return view.getBackground();
-            } else {
-                if (view instanceof ImageView) {
-                    return ((ImageView) view).getDrawable();
-                } else {
-                    throw new UnsupportedOperationException("Cannot set foreground for " + view);
-                }
-            }
-        }
-
         @Override
         public void onLoadFailed(Exception e, Drawable errorDrawable) {
-            setDrawable(errorDrawable);
+            onImageReady(errorDrawable);
+        }
+
+        private void onImageReady(Drawable drawable) {
+            if (background) {
+                setBackground(drawable, view);
+            } else {
+                setDrawable(drawable, view);
+            }
             loader.targetMap.remove(this);
         }
 
         @Override
         public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-            Drawable placeholder = getDrawable();
+            Drawable placeholder = DaliUtils.getPlaceholder(view, background);
             final boolean noFade = glideAnimation == null || glideAnimation instanceof NoAnimation;
+            DaliDrawable drawable;
             if (inCircle) {
-                setDrawable(new CircleFadingBitmapDrawable(view.getContext(), resource, placeholder, noFade));
+                drawable = new CircleFadingDaliDrawable(resource, placeholder, resource.getConfig(), noFade);
             } else {
-                setDrawable(new FadingBitmapDrawable(view.getContext(), resource, placeholder, noFade));
+                if (noFade) {
+                    drawable = new DaliDrawable(resource);
+                } else {
+                    drawable = new FadingDaliDrawable(resource, placeholder, resource.getConfig());
+                }
             }
-            loader.targetMap.remove(this);
+            onImageReady(drawable);
         }
 
     }

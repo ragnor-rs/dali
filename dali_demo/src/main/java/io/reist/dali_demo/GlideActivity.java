@@ -23,7 +23,7 @@ public class GlideActivity extends DemoActivity {
 
         setTitle(R.string.activity_glide);
 
-        recyclerView.setAdapter(new ImageListAdapter() {
+        recyclerView.setAdapter(new ImageListAdapter(R.layout.glide_item) {
 
             @Override
             protected String getUrl(int i) {

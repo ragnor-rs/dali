@@ -9,6 +9,8 @@ import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import static io.reist.dali.DaliUtils.setPlaceholder;
+
 /**
  *
  * DeferredImageLoader doesn't perform actual image loading. It just postpones image request until
@@ -110,9 +112,7 @@ public class DeferredImageLoader implements ImageLoader {
     @Override
     public void load(ImageRequestBuilder builder, View view, boolean background) {
 
-        if (builder.placeholderRes != 0) {
-            Dali.setDrawable(builder.placeholderRes, view, background);
-        }
+        setPlaceholder(builder, view, background);
 
         int width, height;
 

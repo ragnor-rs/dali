@@ -62,19 +62,16 @@ public class BitmapCompat {
         public Bitmap toBitmap(Drawable drawable) {
             if (drawable instanceof BitmapDrawable) {
                 return ((BitmapDrawable) drawable).getBitmap();
-            } else if (drawable instanceof VectorDrawable) {
-                VectorDrawable vectorDrawable = (VectorDrawable) drawable;
+            } else {
                 Bitmap bitmap = Bitmap.createBitmap(
-                        vectorDrawable.getIntrinsicWidth(),
-                        vectorDrawable.getIntrinsicHeight(),
+                        drawable.getIntrinsicWidth(),
+                        drawable.getIntrinsicHeight(),
                         Bitmap.Config.ARGB_8888
                 );
                 Canvas canvas = new Canvas(bitmap);
-                vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-                vectorDrawable.draw(canvas);
+                drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                drawable.draw(canvas);
                 return bitmap;
-            }  else {
-                throw new IllegalArgumentException("Unsupported drawable: " + drawable);
             }
         }
 

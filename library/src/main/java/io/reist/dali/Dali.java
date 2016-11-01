@@ -1,12 +1,9 @@
 package io.reist.dali;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.support.annotation.DrawableRes;
 import android.view.View;
-import android.widget.ImageView;
+
+import static io.reist.dali.DaliUtils.setPlaceholder;
 
 /**
  * Dali is an abstraction above asynchronous image loading libraries. The default implementation
@@ -111,7 +108,7 @@ public class Dali implements ImageLoader {
             mDeferredImageLoader.load(builder, view, background);
         } else {
             if (builder.url == null) {
-                setDrawable(builder.placeholderRes, view, background);
+                setPlaceholder(builder, view, background);
             } else {
                 mMainImageLoader.load(builder, view, background);
             }
@@ -133,50 +130,11 @@ public class Dali implements ImageLoader {
         }
 
         if (builder.url == null) {
-            setDrawable(builder.placeholderRes, callback, context);
+            callback.onImageLoaded(BitmapCompat.toBitmap(context, builder.placeholderRes));
         } else {
             mMainImageLoader.load(builder, callback, context);
         }
 
-    }
-
-    static void setDrawable(@DrawableRes int drawableRes, DaliCallback callback, Context context) {
-        callback.onImageLoaded(BitmapCompat.toBitmap(context, drawableRes));
-    }
-
-    static void setDrawable(@DrawableRes int drawableRes, View view, boolean background) {
-        if (background) {
-
-            if (drawableRes == 0) {
-                setBackground(view, null);
-            } else {
-                view.setBackgroundResource(drawableRes);
-            }
-
-        } else {
-
-            if (view instanceof ImageView) {
-                ImageView imageView = (ImageView) view;
-                if (drawableRes == 0) {
-                    imageView.setImageDrawable(null);
-                } else {
-                    imageView.setImageResource(drawableRes);
-                }
-            } else {
-                throw new UnsupportedOperationException("Cannot set foreground for " + view);
-            }
-
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    @SuppressLint("NewApi")
-    static void setBackground(View view, Drawable background) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-            view.setBackgroundDrawable(background);
-        } else {
-            view.setBackground(background);
-        }
     }
 
     @Override
