@@ -15,7 +15,7 @@ import android.support.annotation.Nullable;
 
 public class FadingDaliDrawable extends DaliDrawable {
 
-    public static final float FADE_DURATION = 5000;
+    public static final float FADE_DURATION = 300;
 
     private float progress = 1;
     private long startTime = -1;

@@ -37,7 +37,6 @@ public abstract class ImageListAdapter extends RecyclerView.Adapter<ImageListAda
         String url = getUrl(i);
         imageView.setPosition(i);
         Dali.load(url)
-                .placeholder(android.R.color.holo_green_dark)
                 .inCircle(true)
                 .into(imageView, false);
         imageView.setBackgroundColor(Color.rgb((int)(Math.random() * 255), (int)(Math.random() * 255), (int)(Math.random() * 255)));
