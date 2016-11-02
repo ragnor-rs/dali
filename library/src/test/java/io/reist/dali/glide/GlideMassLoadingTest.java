@@ -12,6 +12,7 @@ import io.reist.dali.DeferredImageLoader;
 import io.reist.dali.GlideImageLoader;
 import io.reist.dali.MassLoadingTest;
 import io.reist.dali.RobolectricGradle3TestRunner;
+import io.reist.dali.ShadowFadingDaliDrawable;
 import io.reist.dali.TestShadowBitmap;
 
 /**
@@ -24,7 +25,8 @@ import io.reist.dali.TestShadowBitmap;
         shadows = {
                 GlideSingleLoadingTest.ShadowNetwork.class,
                 GlideShadowStreamBitmapDecoder.class,
-                TestShadowBitmap.class
+                TestShadowBitmap.class,
+                ShadowFadingDaliDrawable.class
         },
         application = GlideTestApp.class
 )

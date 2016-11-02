@@ -1,5 +1,6 @@
 package io.reist.dali_demo;
 
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,10 +13,20 @@ import io.reist.dali.Dali;
  */
 public abstract class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.ViewHolder> {
 
+    private final int itemLayoutRes;
+
+    public ImageListAdapter() {
+        this(R.layout.item);
+    }
+
+    public ImageListAdapter(int itemLayoutRes) {
+        this.itemLayoutRes = itemLayoutRes;
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-        View view = layoutInflater.inflate(R.layout.item, parent, false);
+        View view = layoutInflater.inflate(itemLayoutRes, parent, false);
         return new ViewHolder(view);
     }
 
@@ -26,9 +37,15 @@ public abstract class ImageListAdapter extends RecyclerView.Adapter<ImageListAda
         String url = getUrl(i);
         imageView.setPosition(i);
         Dali.load(url)
-                .placeholder(android.R.color.holo_green_dark)
                 .inCircle(true)
                 .into(imageView, false);
+        imageView.setBackgroundColor(Color.rgb((int)(Math.random() * 255), (int)(Math.random() * 255), (int)(Math.random() * 255)));
+    }
+
+    @Override
+    public void onViewRecycled(ViewHolder holder) {
+        super.onViewRecycled(holder);
+        holder.imageView.setImageBitmap(null);
     }
 
     protected abstract String getUrl(int i);

@@ -10,6 +10,8 @@ import android.widget.ImageView;
 import org.mockito.Mockito;
 import org.robolectric.internal.ShadowExtractor;
 
+import io.reist.dali.drawables.FadingDaliDrawable;
+
 /**
  * Created by Reist on 15.06.16.
  */
@@ -30,8 +32,11 @@ public class TestImageView extends ImageView {
 
     @Override
     public void setImageDrawable(Drawable drawable) {
+
         super.setImageDrawable(drawable);
+
         int actualKey = -1;
+
         if (drawable instanceof BitmapDrawable) {
             Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
             Object shadow = ShadowExtractor.extract(bitmap);
@@ -39,11 +44,20 @@ public class TestImageView extends ImageView {
                 TestShadowBitmap shadowBitmap = (TestShadowBitmap) shadow;
                 actualKey = shadowBitmap.getActualKey();
             }
+        } else if (drawable instanceof FadingDaliDrawable) {
+            Object shadow = ShadowExtractor.extract(drawable);
+            if (shadow instanceof ShadowFadingDaliDrawable) {
+                ShadowFadingDaliDrawable shadowDrawable = (ShadowFadingDaliDrawable) shadow;
+                actualKey = shadowDrawable.getKey();
+            }
         }
+
         if (callback != null) {
             callback.onSetImageDrawable(expectedKey, actualKey);
         }
+
         dummy.setImageDrawable(drawable);
+
     }
 
     public void assertMeasureDoesNotSetDrawable() {

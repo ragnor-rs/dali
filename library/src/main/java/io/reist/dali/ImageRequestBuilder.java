@@ -20,7 +20,7 @@ public class ImageRequestBuilder {
     public boolean centerCrop = true;
     public boolean defer = true;
     public boolean inCircle = false;
-    public Bitmap.Config config;
+    public Bitmap.Config config = Bitmap.Config.ARGB_8888;
     public @DrawableRes int placeholderRes;
     public boolean blur = false;
     public boolean disableTransformation;
