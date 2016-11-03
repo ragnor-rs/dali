@@ -92,19 +92,19 @@ public class GlideImageLoader implements ImageLoader {
     private BitmapTypeRequest createBitmapTypeRequest(ImageRequest builder) {
 
         RequestManager requestManager;
-        Object attachTarget = builder.attachTarget;
-        if (attachTarget instanceof android.app.Fragment) {
-            requestManager = Glide.with((android.app.Fragment) attachTarget);
-        } else if (attachTarget instanceof android.support.v4.app.Fragment) {
-            requestManager = Glide.with((android.support.v4.app.Fragment) attachTarget);
-        } else if (attachTarget instanceof FragmentActivity) {
-            requestManager = Glide.with((FragmentActivity) attachTarget);
-        } else if (attachTarget instanceof Activity) {
-            requestManager = Glide.with((Activity) attachTarget);
-        } else if (attachTarget instanceof Context) {
-            requestManager = Glide.with((Context) attachTarget);
+        Object context = builder.context;
+        if (context instanceof android.app.Fragment) {
+            requestManager = Glide.with((android.app.Fragment) context);
+        } else if (context instanceof android.support.v4.app.Fragment) {
+            requestManager = Glide.with((android.support.v4.app.Fragment) context);
+        } else if (context instanceof FragmentActivity) {
+            requestManager = Glide.with((FragmentActivity) context);
+        } else if (context instanceof Activity) {
+            requestManager = Glide.with((Activity) context);
+        } else if (context instanceof Context) {
+            requestManager = Glide.with((Context) context);
         } else {
-            throw new IllegalStateException("Attach target is " + attachTarget);
+            throw new IllegalStateException("Attach target is " + context);
         }
 
         BitmapTypeRequest bitmapTypeRequest = requestManager.load(builder.url).asBitmap();
@@ -117,20 +117,22 @@ public class GlideImageLoader implements ImageLoader {
             bitmapTypeRequest.override(builder.targetWidth, builder.targetHeight);
         }
 
-        Context context = DaliUtils.getApplicationContext(builder.attachTarget);
+        Context appContext = DaliUtils.getApplicationContext(builder.context);
 
-        if (context == null) {
+        if (appContext == null) {
             throw new IllegalStateException("application context is null");
         }
 
         if (!builder.disableTransformation) {
             if (builder.blur) {
                 bitmapTypeRequest.transform(
-                        new OnlyScaleDownTransformation(context, builder.centerCrop),
-                        new BlurTransformation(context, BLUR_RADIUS, BLUR_SAMPLING)
+                        new OnlyScaleDownTransformation(appContext, builder.centerCrop),
+                        new BlurTransformation(appContext, BLUR_RADIUS, BLUR_SAMPLING)
                 );
             } else {
-                bitmapTypeRequest.transform(new OnlyScaleDownTransformation(context, builder.centerCrop));
+                bitmapTypeRequest.transform(
+                        new OnlyScaleDownTransformation(appContext, builder.centerCrop)
+                );
             }
         }
 

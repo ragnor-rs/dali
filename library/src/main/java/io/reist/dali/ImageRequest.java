@@ -13,7 +13,7 @@ import android.view.View;
 @SuppressWarnings("WeakerAccess")
 public class ImageRequest {
 
-    public final Object attachTarget;
+    public final Object context;
 
     public String url;
     public int targetWidth;
@@ -28,8 +28,12 @@ public class ImageRequest {
     public boolean disableTransformation;
     public ImageLoader imageLoader;
 
-    ImageRequest(Object attachTarget) {
-        this.attachTarget = attachTarget;
+    public ImageRequest() {
+        context = null;
+    }
+
+    public ImageRequest(@NonNull Object context) {
+        this.context = context;
     }
 
     public ImageRequest url(String url) {
