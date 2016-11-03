@@ -1,6 +1,6 @@
 package io.reist.dali;
 
-import android.content.Context;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
@@ -110,7 +110,7 @@ public class DeferredImageLoader implements ImageLoader {
     }
 
     @Override
-    public void load(ImageRequestBuilder builder, View view, boolean background) {
+    public void load(@NonNull ImageRequestBuilder builder, @NonNull View view, boolean background) {
 
         setPlaceholder(builder, view, background);
 
@@ -120,7 +120,7 @@ public class DeferredImageLoader implements ImageLoader {
         height = view.getHeight();
 
         if (width <= 0 || height <= 0) {
-            defer(view, new ViewRequestFactory(view, builder, background, Dali.getInstance().getMainImageLoader()));
+            defer(view, new ViewRequestFactory(view, builder, background, DaliLoader.getInstance().getMainImageLoader()));
         } else {
             builder.resize(width, height).into(view, background);
         }
@@ -128,12 +128,12 @@ public class DeferredImageLoader implements ImageLoader {
     }
 
     @Override
-    public void load(ImageRequestBuilder builder, DaliCallback callback, Context context) {
+    public void load(@NonNull ImageRequestBuilder builder, @NonNull DaliCallback callback) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void cancel(Object o) {
+    public void cancel(@NonNull Object o) {
         if (o instanceof View) {
             View view = (View) o;
             ViewRequestFactory viewRequestFactory = requestMap.remove(view);

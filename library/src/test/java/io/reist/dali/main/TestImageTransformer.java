@@ -16,8 +16,9 @@ class TestImageTransformer implements ImageRequestTransformer {
     }
 
     @Override
-    public ImageRequestBuilder transform(ImageRequestBuilder imageRequestBuilder) {
-        return imageRequestBuilder.url(transformString(imageRequestBuilder.url));
+    public ImageRequestBuilder transform(@NonNull ImageRequestBuilder imageRequestBuilder) {
+        imageRequestBuilder.url = transformString(imageRequestBuilder.url);
+        return imageRequestBuilder;
     }
 
 }

@@ -1,11 +1,13 @@
-package io.reist.dali;
+package io.reist.dali.glide;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
 import android.view.View;
 
 import com.bumptech.glide.BitmapTypeRequest;
@@ -25,11 +27,15 @@ import com.bumptech.glide.request.target.ViewTarget;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import io.reist.dali.DaliCallback;
+import io.reist.dali.ImageLoader;
+import io.reist.dali.ImageRequestBuilder;
 import io.reist.dali.drawables.CircleFadingDaliDrawable;
 import io.reist.dali.drawables.DaliDrawable;
 import io.reist.dali.drawables.FadingDaliDrawable;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 
+import static io.reist.dali.DaliUtils.getPlaceholder;
 import static io.reist.dali.DaliUtils.setBackground;
 import static io.reist.dali.DaliUtils.setDrawable;
 
@@ -44,7 +50,7 @@ public class GlideImageLoader implements ImageLoader {
     /**
      * This is to force Glide to generate dummy animations for non-cached images
      */
-    private static final ViewPropertyAnimation.Animator sAnimator = new ViewPropertyAnimation.Animator() {
+    private static final ViewPropertyAnimation.Animator EMPTY_ANIMATOR = new ViewPropertyAnimation.Animator() {
 
         @Override
         public void animate(View view) {}
@@ -57,15 +63,11 @@ public class GlideImageLoader implements ImageLoader {
     private final Map<Object, BaseTarget> targetMap = new WeakHashMap<>();
 
     @Override
-    public void load(ImageRequestBuilder builder, View view, boolean background) {
+    public void load(@NonNull ImageRequestBuilder builder, @NonNull View view, boolean background) {
 
-        BitmapTypeRequest bitmapTypeRequest = createBitmapTypeRequest(
-                view,
-                builder,
-                view.getContext().getApplicationContext()
-        );
+        BitmapTypeRequest bitmapTypeRequest = createBitmapTypeRequest(builder);
 
-        bitmapTypeRequest.animate(sAnimator);
+        bitmapTypeRequest.animate(EMPTY_ANIMATOR);
 
         enqueue(
                 view,
@@ -86,9 +88,23 @@ public class GlideImageLoader implements ImageLoader {
     }
 
     @NonNull
-    private BitmapTypeRequest createBitmapTypeRequest(Object o, ImageRequestBuilder builder, Context context) {
+    private BitmapTypeRequest createBitmapTypeRequest(ImageRequestBuilder builder) {
 
-        final RequestManager requestManager = Glide.with(context);
+        RequestManager requestManager;
+        Object attachTarget = builder.attachTarget;
+        if (attachTarget instanceof android.app.Fragment) {
+            requestManager = Glide.with((android.app.Fragment) attachTarget);
+        } else if (attachTarget instanceof android.support.v4.app.Fragment) {
+            requestManager = Glide.with((android.support.v4.app.Fragment) attachTarget);
+        } else if (attachTarget instanceof FragmentActivity) {
+            requestManager = Glide.with((FragmentActivity) attachTarget);
+        } else if (attachTarget instanceof Activity) {
+            requestManager = Glide.with((Activity) attachTarget);
+        } else if (attachTarget instanceof Context) {
+            requestManager = Glide.with((Context) attachTarget);
+        } else {
+            throw new IllegalStateException("Attach target is " + attachTarget);
+        }
 
         BitmapTypeRequest bitmapTypeRequest = requestManager.load(builder.url).asBitmap();
 
@@ -100,6 +116,7 @@ public class GlideImageLoader implements ImageLoader {
             bitmapTypeRequest.override(builder.targetWidth, builder.targetHeight);
         }
 
+        Context context = builder.getApplicationContext();
         if (builder.disableTransformation) {
             // do nothing
         } else if (builder.blur) {
@@ -120,10 +137,10 @@ public class GlideImageLoader implements ImageLoader {
     }
 
     @Override
-    public void load(ImageRequestBuilder builder, DaliCallback callback, Context context) {
+    public void load(@NonNull ImageRequestBuilder builder, @NonNull DaliCallback callback) {
         enqueue(
                 callback,
-                createBitmapTypeRequest(callback, builder, context),
+                createBitmapTypeRequest(builder),
                 new GlideImageLoaderCallbackTarget(callback, this)
         );
     }
@@ -140,13 +157,11 @@ public class GlideImageLoader implements ImageLoader {
     }
 
     @Override
-    public void cancel(Object o) {
-        if (o != null) {
-            BaseTarget target = targetMap.get(o);
-            if (target != null) {
-                Glide.clear(target);
-                targetMap.remove(o);
-            }
+    public void cancel(@NonNull Object o) {
+        BaseTarget target = targetMap.get(o);
+        if (target != null) {
+            Glide.clear(target);
+            targetMap.remove(o);
         }
     }
 
@@ -197,7 +212,7 @@ public class GlideImageLoader implements ImageLoader {
 
         @Override
         public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-            Drawable placeholder = DaliUtils.getPlaceholder(view, background);
+            Drawable placeholder = getPlaceholder(view, background);
             final boolean noFade = glideAnimation == null || glideAnimation instanceof NoAnimation;
             DaliDrawable drawable;
             if (inCircle) {
@@ -243,7 +258,7 @@ public class GlideImageLoader implements ImageLoader {
 
     /**
      * There's no equivalent for Picasso's onlyScaleDown in Glide. To achieve the same effect,
-     * here goes a transformation with the same effect.
+     * here goes BitmapTransformation
      */
     private static class OnlyScaleDownTransformation extends CenterCrop {
 

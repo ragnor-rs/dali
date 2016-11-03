@@ -16,7 +16,7 @@
             tools:node="remove" />
 
         <meta-data
-            android:name="io.reist.dali.GlideImageLoaderModule"
+            android:name="io.reist.dali.glide.GlideImageLoaderModule"
             android:value="GlideModule" />
 
     </application>

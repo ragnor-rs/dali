@@ -1,7 +1,6 @@
 package io.reist.dali;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -39,7 +38,7 @@ public class DaliUtils {
 
     }
 
-    static Drawable getPlaceholder(
+    public static Drawable getPlaceholder(
             @NonNull View view,
             boolean background
     ) {
@@ -54,7 +53,7 @@ public class DaliUtils {
         }
     }
 
-    static void setDrawable(
+    public static void setDrawable(
             @NonNull Drawable drawable,
             @NonNull View view
     ) {
@@ -65,8 +64,9 @@ public class DaliUtils {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @SuppressLint("NewApi")
-    static void setBackground(
+    public static void setBackground(
             @NonNull Drawable background,
             @NonNull View view
     ) {

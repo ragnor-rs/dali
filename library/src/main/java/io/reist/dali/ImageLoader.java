@@ -1,6 +1,6 @@
 package io.reist.dali;
 
-import android.content.Context;
+import android.support.annotation.NonNull;
 import android.view.View;
 
 /**
@@ -16,21 +16,20 @@ public interface ImageLoader {
      * @param view          a target view
      * @param background    set a loaded image as a background
      */
-    void load(ImageRequestBuilder builder, View view, boolean background);
+    void load(@NonNull ImageRequestBuilder builder, @NonNull View view, boolean background);
 
     /**
      * @param builder       a request to use
      * @param callback      a callback to call on image load completion
-     * @param context       Android application context
      */
-    void load(ImageRequestBuilder builder, DaliCallback callback, Context context);
+    void load(@NonNull ImageRequestBuilder builder, @NonNull DaliCallback callback);
 
     /**
      * Interrupts an image-loading request. To interrupt a request, pass a {@link View} or
      * a {@link DaliCallback} which were used by {@link #load(ImageRequestBuilder, View, boolean)}
-     * or by {@link #load(ImageRequestBuilder, DaliCallback, Context)} respectively.
+     * or by {@link #load(ImageRequestBuilder, DaliCallback)} respectively.
      */
-    void cancel(Object o);
+    void cancel(@NonNull Object o);
 
     /**
      * Stops all requests

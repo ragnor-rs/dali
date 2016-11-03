@@ -4,8 +4,6 @@ import android.app.Application;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 
-import io.reist.dali.GlideImageLoaderModule;
-
 /**
  * Created by Reist on 15.06.16.
  */

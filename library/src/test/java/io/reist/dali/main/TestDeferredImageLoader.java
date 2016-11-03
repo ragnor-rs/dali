@@ -4,7 +4,7 @@ import android.view.View;
 
 import org.mockito.Mockito;
 
-import io.reist.dali.Dali;
+import io.reist.dali.DaliLoader;
 import io.reist.dali.DeferredImageLoader;
 
 /**
@@ -22,7 +22,7 @@ public class TestDeferredImageLoader extends DeferredImageLoader {
 
     public void assertLoadingDeferred(View targetView, boolean shouldCall) {
         Mockito.verify(
-                ((TestDeferredImageLoader) Dali.getInstance().getDeferredImageLoader()).dummy,
+                ((TestDeferredImageLoader) DaliLoader.getInstance().getDeferredImageLoader()).dummy,
                 Mockito.times(shouldCall ? 1 : 0)
         ).defer(
                 Mockito.eq(targetView),

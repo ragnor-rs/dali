@@ -1,8 +1,8 @@
 package io.reist.dali.main;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.support.annotation.NonNull;
 import android.view.View;
 
 import org.robolectric.shadows.ShadowLooper;
@@ -29,7 +29,7 @@ public class AsyncTestImageLoader implements ImageLoader {
     private final static Map<TestImageView, Task> taskMap = new ConcurrentHashMap<>();
 
     @Override
-    public void load(ImageRequestBuilder builder, View view, boolean background) {
+    public void load(@NonNull ImageRequestBuilder builder, @NonNull View view, boolean background) {
         TestImageView imageView = (TestImageView) view;
         int key = TestUtils.urlToKey(builder.url);
         Task task = new Task(key, imageView);
@@ -38,13 +38,13 @@ public class AsyncTestImageLoader implements ImageLoader {
     }
 
     @Override
-    public void load(ImageRequestBuilder builder, DaliCallback callback, Context context) {
+    public void load(@NonNull ImageRequestBuilder builder, @NonNull DaliCallback callback) {
         throw new UnsupportedOperationException();
     }
 
     @SuppressWarnings("SuspiciousMethodCalls")
     @Override
-    public void cancel(Object o) {
+    public void cancel(@NonNull Object o) {
         Task task = taskMap.get(o);
         if (task != null) {
             task.cancel();

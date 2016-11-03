@@ -14,13 +14,11 @@ import io.reist.dali.Dali;
 public abstract class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.ViewHolder> {
 
     private final int itemLayoutRes;
+    private final Dali dali;
 
-    public ImageListAdapter() {
-        this(R.layout.item);
-    }
-
-    public ImageListAdapter(int itemLayoutRes) {
+    public ImageListAdapter(Dali dali, int itemLayoutRes) {
         this.itemLayoutRes = itemLayoutRes;
+        this.dali = dali;
     }
 
     @Override
@@ -32,14 +30,24 @@ public abstract class ImageListAdapter extends RecyclerView.Adapter<ImageListAda
 
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
+
         AdapterImageView imageView = holder.imageView;
+
         int i = holder.getAdapterPosition();
         String url = getUrl(i);
+
         imageView.setPosition(i);
-        Dali.load(url)
+
+        dali.load(url)
                 .inCircle(true)
                 .into(imageView, false);
-        imageView.setBackgroundColor(Color.rgb((int)(Math.random() * 255), (int)(Math.random() * 255), (int)(Math.random() * 255)));
+
+        imageView.setBackgroundColor(Color.rgb(
+                (int)(Math.random() * 255),
+                (int)(Math.random() * 255),
+                (int)(Math.random() * 255))
+        );
+
     }
 
     @Override

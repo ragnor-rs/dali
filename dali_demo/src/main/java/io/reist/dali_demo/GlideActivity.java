@@ -5,7 +5,8 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 
-import io.reist.dali.GlideImageLoader;
+import io.reist.dali.Dali;
+import io.reist.dali.glide.GlideImageLoader;
 
 /**
  * Created by Reist on 14.06.16.
@@ -23,7 +24,7 @@ public class GlideActivity extends DemoActivity {
 
         setTitle(R.string.activity_glide);
 
-        recyclerView.setAdapter(new ImageListAdapter(R.layout.glide_item) {
+        recyclerView.setAdapter(new ImageListAdapter(Dali.with(this), R.layout.glide_item) {
 
             @Override
             protected String getUrl(int i) {

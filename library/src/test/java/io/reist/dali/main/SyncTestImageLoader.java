@@ -1,8 +1,8 @@
 package io.reist.dali.main;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -20,7 +20,7 @@ public class SyncTestImageLoader implements ImageLoader {
     private String url;
 
     @Override
-    public void load(ImageRequestBuilder builder, View view, boolean background) {
+    public void load(@NonNull ImageRequestBuilder builder, @NonNull View view, boolean background) {
         this.url = builder.url;
         if (view instanceof ImageView) {
             ((ImageView) view).setImageDrawable(Mockito.mock(Drawable.class));
@@ -30,13 +30,13 @@ public class SyncTestImageLoader implements ImageLoader {
     }
 
     @Override
-    public void load(ImageRequestBuilder builder, DaliCallback callback, Context context) {
+    public void load(@NonNull ImageRequestBuilder builder, @NonNull DaliCallback callback) {
         this.url = builder.url;
         callback.onImageLoaded(Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565));
     }
 
     @Override
-    public void cancel(Object o) {}
+    public void cancel(@NonNull Object o) {}
 
     @Override
     public void cancelAll() {}

@@ -34,7 +34,7 @@ public abstract class SingleLoadingTest {
         ViewGroup rootView = (ViewGroup) activity.findViewById(android.R.id.content);
         TestImageView view = (TestImageView) rootView.getChildAt(0);
 
-        Dali.load(TEST_URL).defer(false).into(view);
+        Dali.with(activity).load(TEST_URL).defer(false).into(view);
 
         // wait until the request is executed and the result is posted to the main thread
         waitForResult();
@@ -51,14 +51,14 @@ public abstract class SingleLoadingTest {
     @Test
     public void testLoadWithDaliCallback() {
 
-        Dali.load(TEST_URL).into(new DaliCallback() {
+        Dali.with(RuntimeEnvironment.application).load(TEST_URL).into(new DaliCallback() {
 
             @Override
-            public void onImageLoaded(Bitmap bitmap) {
+            public void onImageLoaded(@NonNull Bitmap bitmap) {
                 notifyAboutResult();
             }
 
-        }, RuntimeEnvironment.application);
+        });
 
         // wait until the request is executed and the result is posted to the main thread
         waitForResult();

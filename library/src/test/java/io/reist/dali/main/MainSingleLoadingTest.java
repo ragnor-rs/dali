@@ -10,10 +10,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import io.reist.dali.BuildConfig;
 import io.reist.dali.Dali;
+import io.reist.dali.DaliLoader;
 import io.reist.dali.DeferredImageLoader;
 import io.reist.dali.RobolectricGradle3TestRunner;
 import io.reist.dali.ShadowViewTreeObserver;
@@ -42,12 +44,13 @@ public class MainSingleLoadingTest extends SingleLoadingTest {
     @Test
     public void testRequestTransformer() {
 
-        Dali.load(TEST_URL)
+        Dali.with(RuntimeEnvironment.application)
+                .load(TEST_URL)
                 .defer(false)
                 .transformer(new TestImageTransformer())
                 .into(Mockito.mock(ImageView.class));
 
-        SyncTestImageLoader imageLoader = ((SyncTestImageLoader) Dali.getInstance().getMainImageLoader());
+        SyncTestImageLoader imageLoader = ((SyncTestImageLoader) DaliLoader.getInstance().getMainImageLoader());
 
         Assert.assertEquals(TEST_URL_TRANSFORMED, imageLoader.getUrl());
 
@@ -80,9 +83,9 @@ public class MainSingleLoadingTest extends SingleLoadingTest {
 
     static void assertLoadingDeferred(View targetView, boolean shouldCallDefer) {
 
-        Dali.load(TEST_URL).defer(true).into(targetView);
+        Dali.with(RuntimeEnvironment.application).load(TEST_URL).defer(true).into(targetView);
 
-        DeferredImageLoader deferredImageLoader = Dali.getInstance().getDeferredImageLoader();
+        DeferredImageLoader deferredImageLoader = DaliLoader.getInstance().getDeferredImageLoader();
         ((TestDeferredImageLoader) deferredImageLoader).assertLoadingDeferred(
                 targetView,
                 shouldCallDefer

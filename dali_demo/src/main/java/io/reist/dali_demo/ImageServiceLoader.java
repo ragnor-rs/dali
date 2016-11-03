@@ -1,6 +1,6 @@
 package io.reist.dali_demo;
 
-import android.content.Context;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -16,18 +16,18 @@ import io.reist.dali.ImageRequestBuilder;
 public class ImageServiceLoader implements ImageLoader {
 
     @Override
-    public void load(ImageRequestBuilder builder, View view, boolean background) {
+    public void load(@NonNull ImageRequestBuilder builder, @NonNull View view, boolean background) {
         ImageView imageView = (ImageView) view;
         ImageService.set(imageView, builder.url);
     }
 
     @Override
-    public void load(ImageRequestBuilder builder, DaliCallback callback, Context context) {
+    public void load(@NonNull ImageRequestBuilder builder, @NonNull DaliCallback callback) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void cancel(Object o) {
+    public void cancel(@NonNull Object o) {
         ImageService.cancel((ImageView) o);
     }
 

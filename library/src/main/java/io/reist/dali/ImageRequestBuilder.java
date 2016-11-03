@@ -1,7 +1,10 @@
 package io.reist.dali;
 
+import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.view.View;
@@ -12,6 +15,8 @@ import android.view.View;
  * Created by m039 on 12/30/15.
  */
 public class ImageRequestBuilder {
+
+    public final Object attachTarget;
 
     public String url;
     public int targetWidth;
@@ -25,7 +30,9 @@ public class ImageRequestBuilder {
     public boolean blur = false;
     public boolean disableTransformation;
 
-    ImageRequestBuilder() {}
+    ImageRequestBuilder(Object attachTarget) {
+        this.attachTarget = attachTarget;
+    }
 
     public ImageRequestBuilder url(String url) {
         this.url = url;
@@ -88,11 +95,11 @@ public class ImageRequestBuilder {
     }
 
     public void into(@NonNull View view, boolean background) {
-        Dali.getInstance().load(this, view, background);
+        DaliLoader.getInstance().load(this, view, background);
     }
 
-    public void into(@NonNull DaliCallback callback, @NonNull Context context) {
-        Dali.getInstance().load(this, callback, context);
+    public void into(@NonNull DaliCallback callback) {
+        DaliLoader.getInstance().load(this, callback);
     }
 
     public ImageRequestBuilder targetSize(int w, int h) {
@@ -105,6 +112,26 @@ public class ImageRequestBuilder {
     public ImageRequestBuilder disableTransformation(boolean disableTransformation) {
         this.disableTransformation = disableTransformation;
         return this;
+    }
+
+    public Context getApplicationContext() {
+        if (attachTarget instanceof Activity) {
+            return ((Activity) attachTarget).getApplicationContext();
+        } else if (attachTarget instanceof Fragment) {
+            Fragment fragment = (Fragment) this.attachTarget;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                return fragment.getContext();
+            } else {
+                Activity activity = fragment.getActivity();
+                return activity == null ? null : activity.getApplicationContext();
+            }
+        } else if (attachTarget instanceof android.support.v4.app.Fragment) {
+            return ((android.support.v4.app.Fragment) attachTarget).getContext();
+        } else if (attachTarget instanceof Context) {
+            return ((Context) attachTarget).getApplicationContext();
+        } else {
+            return null;
+        }
     }
 
 }
