@@ -9,10 +9,6 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-/**
- * Created by Reist on 01.11.16.
- */
-
 public class FadingDaliDrawable extends DaliDrawable {
 
     public static final float FADE_DURATION = 300;
@@ -21,7 +17,7 @@ public class FadingDaliDrawable extends DaliDrawable {
     private long startTime = -1;
     private int originalAlpha;
 
-    protected boolean fadingIn;
+    boolean fadingIn;
 
     @Nullable
     private final Drawable placeholder;
@@ -73,7 +69,7 @@ public class FadingDaliDrawable extends DaliDrawable {
             progress = 1;
         }
 
-        if (placeholder != null && progress < 1f) {
+        if (placeholder != null && progress < 1f && placeholderWidth > 0 && placeholderHeight > 0) {
 
             canvas.save();
 
@@ -97,6 +93,7 @@ public class FadingDaliDrawable extends DaliDrawable {
 
     }
 
+    @SuppressWarnings("WeakerAccess")
     protected void drawPlaceholder(@NonNull Canvas canvas) {
         canvas.drawRect(0, 0, placeholderWidth, placeholderHeight, paint);
     }
@@ -115,6 +112,11 @@ public class FadingDaliDrawable extends DaliDrawable {
 
         placeholderWidth = intrinsicWidth == -1 ? right - left : intrinsicWidth;
         placeholderHeight = intrinsicHeight == -1 ? bottom - top : intrinsicHeight;
+
+        if (placeholderWidth <= 0 || placeholderHeight <= 0) {
+            return; // requirement for createBitmap
+        }
+
         placeholder.setBounds(0, 0, placeholderWidth, placeholderHeight);
 
         Bitmap bitmap = Bitmap.createBitmap(placeholderWidth, placeholderHeight, placeholderConfig);

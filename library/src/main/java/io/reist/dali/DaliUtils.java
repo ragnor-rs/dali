@@ -1,21 +1,19 @@
 package io.reist.dali;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
+import android.app.Activity;
+import android.app.Fragment;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.ImageView;
 
-/**
- * Created by Reist on 01.11.16.
- */
-
 public class DaliUtils {
 
     static void setPlaceholder(
-            @NonNull ImageRequestBuilder builder,
+            @NonNull ImageRequest builder,
             @NonNull View view,
             boolean background
     ) {
@@ -39,7 +37,7 @@ public class DaliUtils {
 
     }
 
-    static Drawable getPlaceholder(
+    public static Drawable getPlaceholder(
             @NonNull View view,
             boolean background
     ) {
@@ -54,7 +52,7 @@ public class DaliUtils {
         }
     }
 
-    static void setDrawable(
+    public static void setDrawable(
             @NonNull Drawable drawable,
             @NonNull View view
     ) {
@@ -65,8 +63,9 @@ public class DaliUtils {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @SuppressLint("NewApi")
-    static void setBackground(
+    public static void setBackground(
             @NonNull Drawable background,
             @NonNull View view
     ) {
@@ -74,6 +73,26 @@ public class DaliUtils {
             view.setBackgroundDrawable(background);
         } else {
             view.setBackground(background);
+        }
+    }
+
+    public static Context getApplicationContext(@NonNull Object attachTarget) {
+        if (attachTarget instanceof Activity) {
+            return ((Activity) attachTarget).getApplicationContext();
+        } else if (attachTarget instanceof Fragment) {
+            Fragment fragment = (Fragment) attachTarget;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                return fragment.getContext();
+            } else {
+                Activity activity = fragment.getActivity();
+                return activity == null ? null : activity.getApplicationContext();
+            }
+        } else if (attachTarget instanceof android.support.v4.app.Fragment) {
+            return ((android.support.v4.app.Fragment) attachTarget).getContext();
+        } else if (attachTarget instanceof Context) {
+            return ((Context) attachTarget).getApplicationContext();
+        } else {
+            return null;
         }
     }
 

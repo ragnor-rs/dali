@@ -1,6 +1,7 @@
 package io.reist.dali;
 
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 
 /**
  * An object which uses images loaded by {@link Dali}. Basically, it's a view target, same as
@@ -13,6 +14,6 @@ public interface DaliCallback {
      * after this method because of a particular {@link ImageLoader} implementation.
      * It is recommended to make a copy.
      */
-    void onImageLoaded(Bitmap bitmap);
+    void onImageLoaded(@NonNull Bitmap bitmap);
 
 }

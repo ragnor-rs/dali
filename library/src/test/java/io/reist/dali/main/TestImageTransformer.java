@@ -2,7 +2,7 @@ package io.reist.dali.main;
 
 import android.support.annotation.NonNull;
 
-import io.reist.dali.ImageRequestBuilder;
+import io.reist.dali.ImageRequest;
 import io.reist.dali.ImageRequestTransformer;
 
 /**
@@ -16,8 +16,9 @@ class TestImageTransformer implements ImageRequestTransformer {
     }
 
     @Override
-    public ImageRequestBuilder transform(ImageRequestBuilder imageRequestBuilder) {
-        return imageRequestBuilder.url(transformString(imageRequestBuilder.url));
+    public ImageRequest transform(@NonNull ImageRequest imageRequest) {
+        imageRequest.url = transformString(imageRequest.url);
+        return imageRequest;
     }
 
 }

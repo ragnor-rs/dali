@@ -1,8 +1,8 @@
 package io.reist.dali.main;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.support.annotation.NonNull;
 import android.view.View;
 
 import org.robolectric.shadows.ShadowLooper;
@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.reist.dali.DaliCallback;
 import io.reist.dali.ImageLoader;
-import io.reist.dali.ImageRequestBuilder;
+import io.reist.dali.ImageRequest;
 import io.reist.dali.TestImageView;
 import io.reist.dali.TestUtils;
 
@@ -29,23 +29,23 @@ public class AsyncTestImageLoader implements ImageLoader {
     private final static Map<TestImageView, Task> taskMap = new ConcurrentHashMap<>();
 
     @Override
-    public void load(ImageRequestBuilder builder, View view, boolean background) {
+    public void load(@NonNull ImageRequest request, @NonNull View view, boolean background) {
         TestImageView imageView = (TestImageView) view;
-        int key = TestUtils.urlToKey(builder.url);
+        int key = TestUtils.urlToKey(request.url);
         Task task = new Task(key, imageView);
         executor.submit(task);
         taskMap.put(imageView, task);
     }
 
     @Override
-    public void load(ImageRequestBuilder builder, DaliCallback callback, Context context) {
+    public void load(@NonNull ImageRequest request, @NonNull DaliCallback callback) {
         throw new UnsupportedOperationException();
     }
 
     @SuppressWarnings("SuspiciousMethodCalls")
     @Override
-    public void cancel(Object o) {
-        Task task = taskMap.get(o);
+    public void cancel(@NonNull Object target) {
+        Task task = taskMap.get(target);
         if (task != null) {
             task.cancel();
         }

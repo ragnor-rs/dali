@@ -1,152 +1,52 @@
 package io.reist.dali;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.view.View;
 
-import static io.reist.dali.DaliUtils.setPlaceholder;
+import io.reist.dali.glide.GlideImageLoader;
 
 /**
  * Dali is an abstraction above asynchronous image loading libraries. The default implementation
  * uses {@link GlideImageLoader} which fetches images from the network via Glide library
  * (https://github.com/bumptech/glide). The underlying implementation can be changed by calling
- * {@link #setMainImageLoaderClass(Class)} before {@link ImageRequestBuilder#into(View)},
- * {@link ImageRequestBuilder#into(View, boolean)},
- * {@link ImageRequestBuilder#into(DaliCallback, Context)} or {@link #cancelRequest(Object)} are
+ * {@link #setMainImageLoaderClass(Class)} before {@link ImageRequest#into(View)},
+ * {@link ImageRequest#into(View, boolean)},
+ * {@link ImageRequest#into(DaliCallback)} or {@link #cancel(Object)} are
  * called.
  *
  * Created by m039 on 12/30/15.
  */
-public class Dali implements ImageLoader {
+public class Dali {
 
-    private ImageLoader mMainImageLoader;
-    private DeferredImageLoader mDeferredImageLoader;
+    private final Object attachTarget;
 
-    private Dali() {
-        initMainImageLoader(GlideImageLoader.class);
-        initDeferredImageLoader(DeferredImageLoader.class);
+    private Dali(Object attachTarget) {
+        this.attachTarget = attachTarget;
     }
 
-    @SuppressWarnings("TryWithIdenticalCatches")
-    private void initDeferredImageLoader(Class<? extends DeferredImageLoader> deferredImageLoaderClass) {
-
-        if (mDeferredImageLoader != null) {
-            mDeferredImageLoader.cancelAll();
-        }
-
-        try {
-            mDeferredImageLoader = deferredImageLoaderClass.newInstance();
-        } catch (InstantiationException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-
+    public ImageRequest load(String url) {
+        return new ImageRequest(attachTarget).imageLoader(DaliLoader.getInstance()).url(url);
     }
 
-    @SuppressWarnings("TryWithIdenticalCatches")
-    private void initMainImageLoader(Class<? extends ImageLoader> mainImageLoaderClass) {
-
-        if (mMainImageLoader != null) {
-            mMainImageLoader.cancelAll();
-        }
-
-        try {
-            mMainImageLoader = mainImageLoaderClass.newInstance();
-        } catch (InstantiationException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-
+    public static Dali with(@NonNull Context context) {
+        return new Dali(context);
     }
 
-    public static Dali getInstance() {
-        return SingletonHolder.INSTANCE;
+    public static Dali with(@NonNull android.app.Fragment fragment) {
+        return new Dali(fragment);
     }
 
-    public DeferredImageLoader getDeferredImageLoader() {
-        return mDeferredImageLoader;
-    }
-
-    public ImageLoader getMainImageLoader() {
-        return mMainImageLoader;
-    }
-
-    /**
-     * Used to lazily instantiate Dali in {@link #getInstance()}
-     */
-    public static class SingletonHolder {
-        public static final Dali INSTANCE = new Dali();
-    }
-
-    public static ImageRequestBuilder load(String url) {
-        return new ImageRequestBuilder().url(url);
+    public static Dali with(@NonNull android.support.v4.app.Fragment fragment) {
+        return new Dali(fragment);
     }
 
     /**
      * @see ImageLoader#cancel(Object)
      */
     @SuppressWarnings("unused")
-    public static void cancelRequest(Object o) {
-        getInstance().cancel(o);
-    }
-
-    @Override
-    public void load(ImageRequestBuilder builder, View view, boolean background) {
-
-        if (view == null) {
-            return;
-        }
-
-        cancel(view);
-
-        if (builder.transformer != null) {
-            builder = builder.transformer.transform(builder);
-        }
-
-        if (builder.defer && (builder.targetWidth <= 0 || builder.targetHeight <= 0)) {
-            mDeferredImageLoader.load(builder, view, background);
-        } else {
-            if (builder.url == null) {
-                setPlaceholder(builder, view, background);
-            } else {
-                mMainImageLoader.load(builder, view, background);
-            }
-        }
-
-    }
-
-    @Override
-    public void load(ImageRequestBuilder builder, DaliCallback callback, Context context) {
-
-        if (callback == null) {
-            return;
-        }
-
-        cancel(callback);
-
-        if (builder.transformer != null) {
-            builder = builder.transformer.transform(builder);
-        }
-
-        if (builder.url == null) {
-            callback.onImageLoaded(BitmapCompat.toBitmap(context, builder.placeholderRes));
-        } else {
-            mMainImageLoader.load(builder, callback, context);
-        }
-
-    }
-
-    @Override
-    public void cancel(Object o) {
-        mDeferredImageLoader.cancel(o);
-        mMainImageLoader.cancel(o);
-    }
-
-    @Override
-    public void cancelAll() {
-        mDeferredImageLoader.cancelAll();
-        mMainImageLoader.cancelAll();
+    public static void cancel(@NonNull Object target) {
+        DaliLoader.getInstance().cancel(target);
     }
 
     /**
@@ -158,7 +58,7 @@ public class Dali implements ImageLoader {
      */
     @SuppressWarnings("unused")
     public static void setMainImageLoaderClass(Class<? extends ImageLoader> imageLoaderClass) {
-        getInstance().initMainImageLoader(imageLoaderClass);
+        DaliLoader.getInstance().initMainImageLoader(imageLoaderClass);
     }
 
     /**
@@ -169,7 +69,7 @@ public class Dali implements ImageLoader {
      */
     @SuppressWarnings("unused")
     public static void setDeferredImageLoaderClass(Class<? extends DeferredImageLoader> imageLoaderClass) {
-        getInstance().initDeferredImageLoader(imageLoaderClass);
+        DaliLoader.getInstance().initDeferredImageLoader(imageLoaderClass);
     }
 
 }

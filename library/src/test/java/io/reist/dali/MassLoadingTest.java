@@ -135,7 +135,8 @@ public abstract class MassLoadingTest {
                 @Override
                 public void bindView(TestImageView testImageView, int i) {
                     testImageView.setExpectedKey(i);
-                    Dali.load(TestUtils.keyToUrl(i))
+                    Dali.with(TestActivity.this)
+                            .load(TestUtils.keyToUrl(i))
                             .placeholder(android.R.color.black)
                             .targetSize(1, 1)
                             .disableTransformation(true)    // to keep bitmap meta data
