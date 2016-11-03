@@ -5,11 +5,8 @@ import android.view.View;
 
 import io.reist.dali.glide.GlideImageLoader;
 
+import static io.reist.dali.DaliUtils.getApplicationContext;
 import static io.reist.dali.DaliUtils.setPlaceholder;
-
-/**
- * Created by Reist on 03.11.16.
- */
 
 public class DaliLoader implements ImageLoader {
 
@@ -87,7 +84,7 @@ public class DaliLoader implements ImageLoader {
 
         if (builder.url == null) {
             callback.onImageLoaded(
-                    BitmapCompat.toBitmap(builder.getApplicationContext(), builder.placeholderRes)
+                    BitmapCompat.toBitmap(getApplicationContext(builder.attachTarget), builder.placeholderRes)
             );
         } else {
             mMainImageLoader.load(builder, callback);

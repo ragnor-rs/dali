@@ -11,10 +11,6 @@ import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 
-/**
- * Created by Reist on 01.11.16.
- */
-
 public class DaliDrawable extends Drawable {
 
     @NonNull
@@ -23,10 +19,10 @@ public class DaliDrawable extends Drawable {
     private int alpha = 255;
     private ColorFilter colorFilter = null;
 
-    protected final Paint paint = new Paint();
+    final Paint paint = new Paint();
 
-    protected final float srcWidth;
-    protected final float srcHeight;
+    final float srcWidth;
+    final float srcHeight;
 
     public DaliDrawable(@NonNull Bitmap bitmap) {
         bitmapShader = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
@@ -55,7 +51,7 @@ public class DaliDrawable extends Drawable {
 
     }
 
-    protected void transform(@NonNull Canvas canvas, float srcWidth, float srcHeight) {
+    void transform(@NonNull Canvas canvas, float srcWidth, float srcHeight) {
 
         float scale;
 

@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import io.reist.dali.DaliCallback;
+import io.reist.dali.DaliUtils;
 import io.reist.dali.ImageLoader;
 import io.reist.dali.ImageRequestBuilder;
 import io.reist.dali.drawables.CircleFadingDaliDrawable;
@@ -57,8 +58,8 @@ public class GlideImageLoader implements ImageLoader {
 
     };
 
-    public static final int BLUR_RADIUS = 8;
-    public static final int BLUR_SAMPLING = 16;
+    private static final int BLUR_RADIUS = 8;
+    private static final int BLUR_SAMPLING = 16;
 
     private final Map<Object, BaseTarget> targetMap = new WeakHashMap<>();
 
@@ -116,16 +117,21 @@ public class GlideImageLoader implements ImageLoader {
             bitmapTypeRequest.override(builder.targetWidth, builder.targetHeight);
         }
 
-        Context context = builder.getApplicationContext();
-        if (builder.disableTransformation) {
-            // do nothing
-        } else if (builder.blur) {
-            bitmapTypeRequest.transform(
-                    new OnlyScaleDownTransformation(context, builder.centerCrop),
-                    new BlurTransformation(context, BLUR_RADIUS, BLUR_SAMPLING)
-            );
-        } else {
-            bitmapTypeRequest.transform(new OnlyScaleDownTransformation(context, builder.centerCrop));
+        Context context = DaliUtils.getApplicationContext(builder.attachTarget);
+
+        if (context == null) {
+            throw new IllegalStateException("application context is null");
+        }
+
+        if (!builder.disableTransformation) {
+            if (builder.blur) {
+                bitmapTypeRequest.transform(
+                        new OnlyScaleDownTransformation(context, builder.centerCrop),
+                        new BlurTransformation(context, BLUR_RADIUS, BLUR_SAMPLING)
+                );
+            } else {
+                bitmapTypeRequest.transform(new OnlyScaleDownTransformation(context, builder.centerCrop));
+            }
         }
 
         if (builder.config != null) {
@@ -186,7 +192,7 @@ public class GlideImageLoader implements ImageLoader {
         private final boolean background;
         private final GlideImageLoader loader;
 
-        public GlideImageLoaderViewTarget(View view, boolean inCircle, boolean background, GlideImageLoader loader) {
+        GlideImageLoaderViewTarget(View view, boolean inCircle, boolean background, GlideImageLoader loader) {
             super(view);
             this.inCircle = inCircle;
             this.background = background;
@@ -234,7 +240,7 @@ public class GlideImageLoader implements ImageLoader {
         private final DaliCallback callback;
         private final GlideImageLoader loader;
 
-        public GlideImageLoaderCallbackTarget(DaliCallback callback, GlideImageLoader loader) {
+        GlideImageLoaderCallbackTarget(DaliCallback callback, GlideImageLoader loader) {
             super();
             this.callback = callback;
             this.loader = loader;
@@ -262,11 +268,11 @@ public class GlideImageLoader implements ImageLoader {
      */
     private static class OnlyScaleDownTransformation extends CenterCrop {
 
-        public static final String ID = OnlyScaleDownTransformation.class.getName();
+        static final String ID = OnlyScaleDownTransformation.class.getName();
 
         private final boolean centerCrop;
 
-        public OnlyScaleDownTransformation(Context context, boolean centerCrop) {
+        OnlyScaleDownTransformation(Context context, boolean centerCrop) {
             super(context);
             this.centerCrop = centerCrop;
         }

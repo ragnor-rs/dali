@@ -12,7 +12,6 @@ import java.util.WeakHashMap;
 import static io.reist.dali.DaliUtils.setPlaceholder;
 
 /**
- *
  * DeferredImageLoader doesn't perform actual image loading. It just postpones image request until
  * a view is measured to take advantage of optimizations of various Dali implementations. For
  * instance, if a view size is known and this size is relatively small, it's possible to use less

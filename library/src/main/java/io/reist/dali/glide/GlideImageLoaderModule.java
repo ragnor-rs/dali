@@ -18,7 +18,7 @@ import okhttp3.OkHttpClient;
  */
 public class GlideImageLoaderModule implements GlideModule {
 
-    public static final int TIMEOUT = 1000;
+    private static final int TIMEOUT = 1000;
 
     @Override
     public void applyOptions(Context context, GlideBuilder builder) {}

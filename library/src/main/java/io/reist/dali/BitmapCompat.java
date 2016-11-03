@@ -17,6 +17,7 @@ import android.support.v4.content.ContextCompat;
  *
  * Created by Reist on 02.06.16.
  */
+@SuppressWarnings("WeakerAccess")
 public class BitmapCompat {
 
     private static final BitmapCompatApi IMPL;

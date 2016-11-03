@@ -1,10 +1,6 @@
 package io.reist.dali;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.view.View;
@@ -14,6 +10,7 @@ import android.view.View;
  *
  * Created by m039 on 12/30/15.
  */
+@SuppressWarnings("WeakerAccess")
 public class ImageRequestBuilder {
 
     public final Object attachTarget;
@@ -112,26 +109,6 @@ public class ImageRequestBuilder {
     public ImageRequestBuilder disableTransformation(boolean disableTransformation) {
         this.disableTransformation = disableTransformation;
         return this;
-    }
-
-    public Context getApplicationContext() {
-        if (attachTarget instanceof Activity) {
-            return ((Activity) attachTarget).getApplicationContext();
-        } else if (attachTarget instanceof Fragment) {
-            Fragment fragment = (Fragment) this.attachTarget;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                return fragment.getContext();
-            } else {
-                Activity activity = fragment.getActivity();
-                return activity == null ? null : activity.getApplicationContext();
-            }
-        } else if (attachTarget instanceof android.support.v4.app.Fragment) {
-            return ((android.support.v4.app.Fragment) attachTarget).getContext();
-        } else if (attachTarget instanceof Context) {
-            return ((Context) attachTarget).getApplicationContext();
-        } else {
-            return null;
-        }
     }
 
 }
