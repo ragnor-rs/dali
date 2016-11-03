@@ -10,9 +10,9 @@ import io.reist.dali.glide.GlideImageLoader;
  * Dali is an abstraction above asynchronous image loading libraries. The default implementation
  * uses {@link GlideImageLoader} which fetches images from the network via Glide library
  * (https://github.com/bumptech/glide). The underlying implementation can be changed by calling
- * {@link #setMainImageLoaderClass(Class)} before {@link ImageRequestBuilder#into(View)},
- * {@link ImageRequestBuilder#into(View, boolean)},
- * {@link ImageRequestBuilder#into(DaliCallback)} or {@link #cancel(Object)} are
+ * {@link #setMainImageLoaderClass(Class)} before {@link ImageRequest#into(View)},
+ * {@link ImageRequest#into(View, boolean)},
+ * {@link ImageRequest#into(DaliCallback)} or {@link #cancel(Object)} are
  * called.
  *
  * Created by m039 on 12/30/15.
@@ -25,8 +25,8 @@ public class Dali {
         this.attachTarget = attachTarget;
     }
 
-    public ImageRequestBuilder load(String url) {
-        return new ImageRequestBuilder(attachTarget).url(url);
+    public ImageRequest load(String url) {
+        return new ImageRequest(attachTarget).imageLoader(DaliLoader.getInstance()).url(url);
     }
 
     public static Dali with(@NonNull Context context) {

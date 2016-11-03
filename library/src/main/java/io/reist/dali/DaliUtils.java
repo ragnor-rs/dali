@@ -13,7 +13,7 @@ import android.widget.ImageView;
 public class DaliUtils {
 
     static void setPlaceholder(
-            @NonNull ImageRequestBuilder builder,
+            @NonNull ImageRequest builder,
             @NonNull View view,
             boolean background
     ) {

@@ -7,13 +7,13 @@ import android.support.annotation.NonNull;
  */
 public interface ImageRequestTransformer {
 
-    ImageRequestBuilder transform(@NonNull ImageRequestBuilder imageRequestBuilder);
+    ImageRequest transform(@NonNull ImageRequest imageRequest);
 
     ImageRequestTransformer IDENTITY = new ImageRequestTransformer() {
 
         @Override
-        public ImageRequestBuilder transform(@NonNull ImageRequestBuilder imageRequestBuilder) {
-            return imageRequestBuilder;
+        public ImageRequest transform(@NonNull ImageRequest imageRequest) {
+            return imageRequest;
         }
 
     };

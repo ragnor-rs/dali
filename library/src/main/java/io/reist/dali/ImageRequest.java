@@ -6,12 +6,12 @@ import android.support.annotation.NonNull;
 import android.view.View;
 
 /**
- * Builds requests for {@link Dali}.
+ * Requests for {@link Dali}.
  *
  * Created by m039 on 12/30/15.
  */
 @SuppressWarnings("WeakerAccess")
-public class ImageRequestBuilder {
+public class ImageRequest {
 
     public final Object attachTarget;
 
@@ -26,30 +26,31 @@ public class ImageRequestBuilder {
     public @DrawableRes int placeholderRes;
     public boolean blur = false;
     public boolean disableTransformation;
+    public ImageLoader imageLoader;
 
-    ImageRequestBuilder(Object attachTarget) {
+    ImageRequest(Object attachTarget) {
         this.attachTarget = attachTarget;
     }
 
-    public ImageRequestBuilder url(String url) {
+    public ImageRequest url(String url) {
         this.url = url;
         return this;
     }
 
-    public ImageRequestBuilder resize(int width, int height) {
+    public ImageRequest resize(int width, int height) {
         this.targetWidth = width;
         this.targetHeight = height;
         return this;
     }
 
     @SuppressWarnings("unused")
-    public ImageRequestBuilder transformer(ImageRequestTransformer transformer) {
+    public ImageRequest transformer(ImageRequestTransformer transformer) {
         this.transformer = transformer;
         return this;
     }
 
     @SuppressWarnings("unused")
-    public ImageRequestBuilder centerCrop(boolean centerCrop) {
+    public ImageRequest centerCrop(boolean centerCrop) {
         this.centerCrop = centerCrop;
         return this;
     }
@@ -58,31 +59,31 @@ public class ImageRequestBuilder {
      * @param defer     image loading will be deferred until an image be measured
      */
     @SuppressWarnings("unused")
-    public ImageRequestBuilder defer(boolean defer) {
+    public ImageRequest defer(boolean defer) {
         this.defer = defer;
         return this;
     }
 
     @SuppressWarnings("unused")
-    public ImageRequestBuilder inCircle(boolean inCircle) {
+    public ImageRequest inCircle(boolean inCircle) {
         this.inCircle = inCircle;
         return this;
     }
 
     @SuppressWarnings("unused")
-    public ImageRequestBuilder config(Bitmap.Config config) {
+    public ImageRequest config(Bitmap.Config config) {
         this.config = config;
         return this;
     }
 
     @SuppressWarnings("unused")
-    public ImageRequestBuilder placeholder(@DrawableRes int placeholderRes) {
+    public ImageRequest placeholder(@DrawableRes int placeholderRes) {
         this.placeholderRes = placeholderRes;
         return this;
     }
 
     @SuppressWarnings("unused")
-    public ImageRequestBuilder blur(boolean blur) {
+    public ImageRequest blur(boolean blur) {
         this.blur = blur;
         return this;
     }
@@ -92,22 +93,31 @@ public class ImageRequestBuilder {
     }
 
     public void into(@NonNull View view, boolean background) {
-        DaliLoader.getInstance().load(this, view, background);
+        if (imageLoader != null) {
+            imageLoader.load(this, view, background);
+        }
     }
 
     public void into(@NonNull DaliCallback callback) {
-        DaliLoader.getInstance().load(this, callback);
+        if (imageLoader != null) {
+            imageLoader.load(this, callback);
+        }
     }
 
-    public ImageRequestBuilder targetSize(int w, int h) {
+    public ImageRequest targetSize(int w, int h) {
         targetWidth = w;
         targetHeight = h;
         return this;
     }
 
     @SuppressWarnings("unused")
-    public ImageRequestBuilder disableTransformation(boolean disableTransformation) {
+    public ImageRequest disableTransformation(boolean disableTransformation) {
         this.disableTransformation = disableTransformation;
+        return this;
+    }
+
+    public ImageRequest imageLoader(ImageLoader imageLoader) {
+        this.imageLoader = imageLoader;
         return this;
     }
 

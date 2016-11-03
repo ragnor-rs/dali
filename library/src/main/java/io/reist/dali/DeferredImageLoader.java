@@ -25,7 +25,7 @@ public class DeferredImageLoader implements ImageLoader {
 
     /**
      * It's ok that the map is never queried because the loading process starts in
-     * {@link ViewRequestFactory#ViewRequestFactory(View, ImageRequestBuilder, boolean, ImageLoader)}.
+     * {@link ViewRequestFactory#ViewRequestFactory(View, ImageRequest, boolean, ImageLoader)}.
      * In here, a pre-draw listener is created. The listener requests an image after the
      * attached {@link ImageView} size has its size calculated.
      */
@@ -33,19 +33,19 @@ public class DeferredImageLoader implements ImageLoader {
 
     protected static class ViewRequestFactory implements ViewTreeObserver.OnPreDrawListener {
 
-        private final ImageRequestBuilder builder;
+        private final ImageRequest imageRequest;
         private final WeakReference<View> target;
         private final boolean background;
         private final ImageLoader mainImageLoader;
 
         ViewRequestFactory(
                 View target,
-                ImageRequestBuilder builder,
+                ImageRequest imageRequest,
                 boolean background,
                 ImageLoader mainImageLoader
         ) {
 
-            this.builder = builder;
+            this.imageRequest = imageRequest;
             this.target = new WeakReference<>(target);
             this.background = background;
             this.mainImageLoader = mainImageLoader;
@@ -76,7 +76,7 @@ public class DeferredImageLoader implements ImageLoader {
                 return true;
             }
 
-            mainImageLoader.load(builder, target, background);
+            mainImageLoader.load(imageRequest, target, background);
 
             vto.removeOnPreDrawListener(this);
 
@@ -109,9 +109,9 @@ public class DeferredImageLoader implements ImageLoader {
     }
 
     @Override
-    public void load(@NonNull ImageRequestBuilder builder, @NonNull View view, boolean background) {
+    public void load(@NonNull ImageRequest request, @NonNull View view, boolean background) {
 
-        setPlaceholder(builder, view, background);
+        setPlaceholder(request, view, background);
 
         int width, height;
 
@@ -119,22 +119,22 @@ public class DeferredImageLoader implements ImageLoader {
         height = view.getHeight();
 
         if (width <= 0 || height <= 0) {
-            defer(view, new ViewRequestFactory(view, builder, background, DaliLoader.getInstance().getMainImageLoader()));
+            defer(view, new ViewRequestFactory(view, request, background, DaliLoader.getInstance().getMainImageLoader()));
         } else {
-            builder.resize(width, height).into(view, background);
+            request.resize(width, height).into(view, background);
         }
 
     }
 
     @Override
-    public void load(@NonNull ImageRequestBuilder builder, @NonNull DaliCallback callback) {
+    public void load(@NonNull ImageRequest request, @NonNull DaliCallback callback) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void cancel(@NonNull Object o) {
-        if (o instanceof View) {
-            View view = (View) o;
+    public void cancel(@NonNull Object target) {
+        if (target instanceof View) {
+            View view = (View) target;
             ViewRequestFactory viewRequestFactory = requestMap.remove(view);
             if (viewRequestFactory != null) {
                 viewRequestFactory.cancel();

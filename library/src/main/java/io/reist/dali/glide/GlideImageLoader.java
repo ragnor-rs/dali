@@ -30,7 +30,7 @@ import java.util.WeakHashMap;
 import io.reist.dali.DaliCallback;
 import io.reist.dali.DaliUtils;
 import io.reist.dali.ImageLoader;
-import io.reist.dali.ImageRequestBuilder;
+import io.reist.dali.ImageRequest;
 import io.reist.dali.drawables.CircleFadingDaliDrawable;
 import io.reist.dali.drawables.DaliDrawable;
 import io.reist.dali.drawables.FadingDaliDrawable;
@@ -64,9 +64,9 @@ public class GlideImageLoader implements ImageLoader {
     private final Map<Object, BaseTarget> targetMap = new WeakHashMap<>();
 
     @Override
-    public void load(@NonNull ImageRequestBuilder builder, @NonNull View view, boolean background) {
+    public void load(@NonNull ImageRequest request, @NonNull View view, boolean background) {
 
-        BitmapTypeRequest bitmapTypeRequest = createBitmapTypeRequest(builder);
+        BitmapTypeRequest bitmapTypeRequest = createBitmapTypeRequest(request);
 
         bitmapTypeRequest.animate(EMPTY_ANIMATOR);
 
@@ -75,7 +75,7 @@ public class GlideImageLoader implements ImageLoader {
                 bitmapTypeRequest,
                 new GlideImageLoaderViewTarget(
                         view,
-                        builder.inCircle,
+                        request.inCircle,
                         background,
                         this
                 )
@@ -89,7 +89,7 @@ public class GlideImageLoader implements ImageLoader {
     }
 
     @NonNull
-    private BitmapTypeRequest createBitmapTypeRequest(ImageRequestBuilder builder) {
+    private BitmapTypeRequest createBitmapTypeRequest(ImageRequest builder) {
 
         RequestManager requestManager;
         Object attachTarget = builder.attachTarget;
@@ -143,10 +143,10 @@ public class GlideImageLoader implements ImageLoader {
     }
 
     @Override
-    public void load(@NonNull ImageRequestBuilder builder, @NonNull DaliCallback callback) {
+    public void load(@NonNull ImageRequest request, @NonNull DaliCallback callback) {
         enqueue(
                 callback,
-                createBitmapTypeRequest(builder),
+                createBitmapTypeRequest(request),
                 new GlideImageLoaderCallbackTarget(callback, this)
         );
     }

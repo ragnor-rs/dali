@@ -6,7 +6,7 @@ import android.widget.ImageView;
 
 import io.reist.dali.DaliCallback;
 import io.reist.dali.ImageLoader;
-import io.reist.dali.ImageRequestBuilder;
+import io.reist.dali.ImageRequest;
 
 /**
  * Uses {@link ImageService} as a image provider
@@ -16,19 +16,19 @@ import io.reist.dali.ImageRequestBuilder;
 public class ImageServiceLoader implements ImageLoader {
 
     @Override
-    public void load(@NonNull ImageRequestBuilder builder, @NonNull View view, boolean background) {
+    public void load(@NonNull ImageRequest request, @NonNull View view, boolean background) {
         ImageView imageView = (ImageView) view;
-        ImageService.set(imageView, builder.url);
+        ImageService.set(imageView, request.url);
     }
 
     @Override
-    public void load(@NonNull ImageRequestBuilder builder, @NonNull DaliCallback callback) {
+    public void load(@NonNull ImageRequest request, @NonNull DaliCallback callback) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void cancel(@NonNull Object o) {
-        ImageService.cancel((ImageView) o);
+    public void cancel(@NonNull Object target) {
+        ImageService.cancel((ImageView) target);
     }
 
     @Override

@@ -53,49 +53,49 @@ public class DaliLoader implements ImageLoader {
     }
 
     @Override
-    public void load(@NonNull ImageRequestBuilder builder, @NonNull View view, boolean background) {
+    public void load(@NonNull ImageRequest request, @NonNull View view, boolean background) {
 
         cancel(view);
 
-        if (builder.transformer != null) {
-            builder = builder.transformer.transform(builder);
+        if (request.transformer != null) {
+            request = request.transformer.transform(request);
         }
 
-        if (builder.defer && (builder.targetWidth <= 0 || builder.targetHeight <= 0)) {
-            mDeferredImageLoader.load(builder, view, background);
+        if (request.defer && (request.targetWidth <= 0 || request.targetHeight <= 0)) {
+            mDeferredImageLoader.load(request, view, background);
         } else {
-            if (builder.url == null) {
-                setPlaceholder(builder, view, background);
+            if (request.url == null) {
+                setPlaceholder(request, view, background);
             } else {
-                mMainImageLoader.load(builder, view, background);
+                mMainImageLoader.load(request, view, background);
             }
         }
 
     }
 
     @Override
-    public void load(@NonNull ImageRequestBuilder builder, @NonNull DaliCallback callback) {
+    public void load(@NonNull ImageRequest request, @NonNull DaliCallback callback) {
 
         cancel(callback);
 
-        if (builder.transformer != null) {
-            builder = builder.transformer.transform(builder);
+        if (request.transformer != null) {
+            request = request.transformer.transform(request);
         }
 
-        if (builder.url == null) {
+        if (request.url == null) {
             callback.onImageLoaded(
-                    BitmapCompat.toBitmap(getApplicationContext(builder.attachTarget), builder.placeholderRes)
+                    BitmapCompat.toBitmap(getApplicationContext(request.attachTarget), request.placeholderRes)
             );
         } else {
-            mMainImageLoader.load(builder, callback);
+            mMainImageLoader.load(request, callback);
         }
 
     }
 
     @Override
-    public void cancel(@NonNull Object o) {
-        mDeferredImageLoader.cancel(o);
-        mMainImageLoader.cancel(o);
+    public void cancel(@NonNull Object target) {
+        mDeferredImageLoader.cancel(target);
+        mMainImageLoader.cancel(target);
     }
 
     @Override
