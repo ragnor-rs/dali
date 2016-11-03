@@ -37,7 +37,7 @@ public class DaliDrawable extends Drawable {
     @Override
     public void draw(@NonNull Canvas canvas) {
 
-        if (alpha == 0) {
+        if (alpha == 0 || srcWidth <= 0 || srcHeight <= 0) {
             return;
         }
 

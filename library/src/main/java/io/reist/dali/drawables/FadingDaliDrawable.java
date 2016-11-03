@@ -73,7 +73,7 @@ public class FadingDaliDrawable extends DaliDrawable {
             progress = 1;
         }
 
-        if (placeholder != null && progress < 1f) {
+        if (placeholder != null && progress < 1f && placeholderWidth > 0 && placeholderHeight > 0) {
 
             canvas.save();
 
@@ -115,6 +115,11 @@ public class FadingDaliDrawable extends DaliDrawable {
 
         placeholderWidth = intrinsicWidth == -1 ? right - left : intrinsicWidth;
         placeholderHeight = intrinsicHeight == -1 ? bottom - top : intrinsicHeight;
+
+        if (placeholderWidth <= 0 || placeholderHeight <= 0) {
+            return; // requirement for createBitmap
+        }
+
         placeholder.setBounds(0, 0, placeholderWidth, placeholderHeight);
 
         Bitmap bitmap = Bitmap.createBitmap(placeholderWidth, placeholderHeight, placeholderConfig);
