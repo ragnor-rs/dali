@@ -22,6 +22,12 @@ import io.reist.dali.glide.GlideImageLoader;
 public class Dali {
 
     private final Object attachTarget;
+
+    @SuppressWarnings("unused")
+    public Context getApplicationContext() {
+        return applicationContext;
+    }
+
     private final Context applicationContext;
 
     private Dali(Object attachTarget) {
