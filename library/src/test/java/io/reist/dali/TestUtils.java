@@ -21,7 +21,7 @@ import static junit.framework.Assert.*;
  */
 public class TestUtils {
 
-    public static void delay(int ms) {
+    public static void delay(long ms) {
         try {
             Thread.sleep(ms);
         } catch (InterruptedException e) {
