@@ -50,7 +50,8 @@ public class DeferredImageLoader implements ImageLoader {
             this.background = background;
             this.mainImageLoader = mainImageLoader;
 
-            target.getViewTreeObserver().addOnPreDrawListener(this);
+            ViewTreeObserver viewTreeObserver = target.getViewTreeObserver();
+            viewTreeObserver.addOnPreDrawListener(this);
 
         }
 

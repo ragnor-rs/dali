@@ -1,7 +1,9 @@
 package io.reist.dali;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 
 import io.reist.dali.glide.GlideImageLoader;
@@ -21,12 +23,29 @@ public class Dali {
 
     private final Object attachTarget;
 
+    @SuppressWarnings("unused")
+    public Context getApplicationContext() {
+        return applicationContext;
+    }
+
+    private final Context applicationContext;
+
     private Dali(Object attachTarget) {
         this.attachTarget = attachTarget;
+        this.applicationContext = DaliUtils.getApplicationContext(attachTarget);
+    }
+
+    private Dali() {
+        this.attachTarget = null;
+        this.applicationContext = null;
     }
 
     public ImageRequest load(String url) {
-        return new ImageRequest(attachTarget).imageLoader(DaliLoader.getInstance()).url(url);
+        if (attachTarget == null || applicationContext == null) {
+            return new ImageRequest();
+        } else {
+            return new ImageRequest(attachTarget).imageLoader(DaliLoader.getInstance()).url(url);
+        }
     }
 
     public static Dali with(@NonNull Context context) {
@@ -39,6 +58,32 @@ public class Dali {
 
     public static Dali with(@NonNull android.support.v4.app.Fragment fragment) {
         return new Dali(fragment);
+    }
+
+    public static Dali with(@NonNull View view) {
+        Activity activity = extractActivity(view.getContext());
+        if (activity == null) {
+            return stub();
+        } else {
+            return with(activity);
+        }
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static Dali stub() {
+        return new Dali();
+    }
+
+    private static Activity extractActivity(Context context) {
+        if (context instanceof Activity) {
+            return ((Activity) context);
+        } else if (context instanceof ContextThemeWrapper) {
+            // for fragment dialogs
+            Context parent = ((ContextThemeWrapper) context).getBaseContext();
+            return extractActivity(parent);
+        } else {
+            return null;
+        }
     }
 
     /**

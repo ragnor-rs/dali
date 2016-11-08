@@ -13,11 +13,11 @@ import android.view.View;
 @SuppressWarnings("WeakerAccess")
 public class ImageRequest {
 
-    public final Object context;
+    public final Object attachTarget;
 
-    public String url;
-    public int targetWidth;
-    public int targetHeight;
+    public String url = null;
+    public int targetWidth = 0;
+    public int targetHeight = 0;
     public ImageRequestTransformer transformer = ImageRequestTransformer.IDENTITY;
     public boolean centerCrop = true;
     public boolean defer = true;
@@ -25,15 +25,15 @@ public class ImageRequest {
     public Bitmap.Config config = Bitmap.Config.ARGB_8888;
     public @DrawableRes int placeholderRes;
     public boolean blur = false;
-    public boolean disableTransformation;
-    public ImageLoader imageLoader;
+    public boolean disableTransformation = false;
+    public ImageLoader imageLoader = null;
 
     public ImageRequest() {
-        context = null;
+        attachTarget = null;
     }
 
-    public ImageRequest(@NonNull Object context) {
-        this.context = context;
+    public ImageRequest(@NonNull Object attachTarget) {
+        this.attachTarget = attachTarget;
     }
 
     public ImageRequest url(String url) {

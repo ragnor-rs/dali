@@ -92,19 +92,19 @@ public class GlideImageLoader implements ImageLoader {
     private BitmapTypeRequest createBitmapTypeRequest(ImageRequest builder) {
 
         RequestManager requestManager;
-        Object context = builder.context;
-        if (context instanceof android.app.Fragment) {
-            requestManager = Glide.with((android.app.Fragment) context);
-        } else if (context instanceof android.support.v4.app.Fragment) {
-            requestManager = Glide.with((android.support.v4.app.Fragment) context);
-        } else if (context instanceof FragmentActivity) {
-            requestManager = Glide.with((FragmentActivity) context);
-        } else if (context instanceof Activity) {
-            requestManager = Glide.with((Activity) context);
-        } else if (context instanceof Context) {
-            requestManager = Glide.with((Context) context);
+        Object attachTarget = builder.attachTarget;
+        if (attachTarget instanceof android.app.Fragment) {
+            requestManager = Glide.with((android.app.Fragment) attachTarget);
+        } else if (attachTarget instanceof android.support.v4.app.Fragment) {
+            requestManager = Glide.with((android.support.v4.app.Fragment) attachTarget);
+        } else if (attachTarget instanceof FragmentActivity) {
+            requestManager = Glide.with((FragmentActivity) attachTarget);
+        } else if (attachTarget instanceof Activity) {
+            requestManager = Glide.with((Activity) attachTarget);
+        } else if (attachTarget instanceof Context) {
+            requestManager = Glide.with((Context) attachTarget);
         } else {
-            throw new IllegalStateException("Attach target is " + context);
+            throw new IllegalStateException("Attach target is " + attachTarget);
         }
 
         BitmapTypeRequest bitmapTypeRequest = requestManager.load(builder.url).asBitmap();
@@ -117,7 +117,7 @@ public class GlideImageLoader implements ImageLoader {
             bitmapTypeRequest.override(builder.targetWidth, builder.targetHeight);
         }
 
-        Context appContext = DaliUtils.getApplicationContext(builder.context);
+        Context appContext = DaliUtils.getApplicationContext(builder.attachTarget);
 
         if (appContext == null) {
             throw new IllegalStateException("application context is null");
