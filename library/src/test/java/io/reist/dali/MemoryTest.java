@@ -2,6 +2,7 @@ package io.reist.dali;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,8 +12,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
@@ -21,9 +20,6 @@ import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowNetwork;
 import org.robolectric.util.ActivityController;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -41,141 +37,38 @@ import static junit.framework.Assert.fail;
 )
 public class MemoryTest {
 
-    private static final long UI_TIMEOUT = TimeUnit.MILLISECONDS.convert(5, TimeUnit.MINUTES);
+    private static final long SCREEN_LIFETIME =  TimeUnit.MILLISECONDS.convert(20, TimeUnit.SECONDS);
+    private static final long LOAD_PERIOD =  TimeUnit.MILLISECONDS.convert(600, TimeUnit.MILLISECONDS);
 
-    private static final long LOAD_PERIOD =  TimeUnit.MILLISECONDS.convert(500, TimeUnit.MILLISECONDS);
+    private static final long MEM_DUMP_PERIOD = TimeUnit.MILLISECONDS.convert(5, TimeUnit.SECONDS);
+
+    //
 
     private static final String[] IMAGE_URLS = new String[] {
             "https://static.pexels.com/photos/6548/cold-snow-winter-mountain.jpeg",
             "http://os1.i.ua/1/11/560705.jpg",
-            "https://newevolutiondesigns.com/images/freebies/city-wallpaper-47.jpg"
+            "https://newevolutiondesigns.com/images/freebies/city-wallpaper-47.jpg",
+            "http://test.schoolchildparents.com/assets/images/flower1.jpg",
+            "http://www.rabstol.net/uploads/gallery/main/553/rabstol_net_fire_04.jpg"
     };
 
     private static final Random RANDOM = new Random();
 
-    private static final long MEM_DUMP_PERIOD = TimeUnit.MILLISECONDS.convert(5, TimeUnit.SECONDS);
-
-    private static final int MEM_CHECKS_MIN = (IMAGE_URLS.length + 1) * 2;
+    private static final int MEM_CHECKS_MIN = IMAGE_URLS.length + 1;
     private static final int MEM_CHECKS_MAX = MEM_CHECKS_MIN * 2;
 
+    private volatile boolean finish = false;
+    private volatile boolean leak = false;
+
     @Test
-    public void viewBounds() {
+    public void fragmentSwitching() {
 
-        final ActivityController<TestActivity> activityController = Robolectric.buildActivity(TestActivity.class);
-        final TestActivity testActivity = activityController.create().start().resume().visible().get();
+        new MemoryChecker().start();
 
-        testMem(new Runnable() {
+        doUiWork();
 
-            @Override
-            public void run() {
-
-                ImageView imageView = testActivity.fragment.imageView;
-
-                Dali.with(testActivity)
-                        .load(IMAGE_URLS[RANDOM.nextInt(IMAGE_URLS.length)])
-                        .placeholder(R.drawable.placeholder)
-                        .into(imageView);
-
-
-//                final List<Object> list = new ArrayList<>();
-//                list.add(new Object() {
-//
-//                    List<BigInteger> objects = new ArrayList<>();
-//
-//                    {
-//                        for (int i = 0; i < 1000000; i++) {
-//                            objects.add(new BigInteger(Integer.toString(RANDOM.nextInt(Integer.MAX_VALUE))));
-//                        }
-//                    }
-//
-//                });
-
-            }
-
-        });
-
-        activityController.pause().stop().destroy();
-
-    }
-
-    protected static void testMem(Runnable r) {
-
-        long startTime = System.currentTimeMillis();
-        long lastLoadTime = startTime;
-        long lastMemDumpTime = startTime;
-
-        Runtime runtime = Runtime.getRuntime();
-
-        long currentMinFreeMemory = -1;
-        long currentMaxFreeMemory = -1;
-        long memCheck = 0;
-        long currentMaxTotalMemory = -1;
-        long lastMaxTotalMemory = -1;
-
-        while (true) {
-
-            TestUtils.delay(40);
-
-            // do UI work
-            long currentTime = System.currentTimeMillis();
-            if (currentTime - startTime > UI_TIMEOUT) {
-                break;
-            }
-            ShadowLooper.runUiThreadTasksIncludingDelayedTasks();
-
-            // periodically do the work under test
-            if (currentTime - lastLoadTime > LOAD_PERIOD) {
-                r.run();
-                lastLoadTime = currentTime;
-            }
-
-            // periodically check memory status
-            if (currentTime - lastMemDumpTime > MEM_DUMP_PERIOD) {
-
-                // measure min, current, max
-                long currentFreeMemory = runtime.freeMemory();
-                if (currentMinFreeMemory == -1 || currentFreeMemory < currentMinFreeMemory) {
-                    currentMinFreeMemory = currentFreeMemory;
-                }
-                if (currentMaxFreeMemory == -1 || currentFreeMemory > currentMaxFreeMemory) {
-                    currentMaxFreeMemory = currentFreeMemory;
-                }
-                long currentTotalMemory = runtime.totalMemory();
-                if (currentMaxTotalMemory == -1 || currentTotalMemory > currentMaxTotalMemory) {
-                    currentMaxTotalMemory = currentTotalMemory;
-                }
-                System.out.println("Free: " + currentFreeMemory);
-                System.out.println("Min free: " + currentMinFreeMemory);
-                System.out.println("Max free: " + currentMaxFreeMemory);
-                System.out.println("Total: " + currentTotalMemory);
-                System.out.println("Max total: " + currentMaxTotalMemory);
-                System.out.println();
-
-                if (lastMaxTotalMemory == -1) {
-                    lastMaxTotalMemory = currentMaxTotalMemory;
-                }
-
-                // checks
-                memCheck++;
-                if (memCheck > MEM_CHECKS_MAX) {
-                    break;
-                } else if (memCheck > MEM_CHECKS_MIN) {
-                    if (currentMaxTotalMemory > lastMaxTotalMemory) {
-                        fail("Leak detected");
-                    } else if (currentMaxTotalMemory < lastMaxTotalMemory) {
-                        break; // GC freed memory = nothing is leaking
-                    }
-                }
-
-                lastMemDumpTime = currentTime;
-
-                lastMaxTotalMemory = currentMaxTotalMemory;
-
-            }
-
-            // keep memory usage to minimum
-            System.gc();
-
+        if (leak) {
+            fail("Leak detected");
         }
 
     }
@@ -186,7 +79,7 @@ public class MemoryTest {
 
         private FrameLayout container;
 
-        private TestFragment fragment;
+        TestFragment fragment;
 
         @SuppressWarnings("ResourceType")
         @Override
@@ -199,11 +92,25 @@ public class MemoryTest {
 
             setContentView(container);
 
+       }
+
+        @SuppressWarnings("ResourceType")
+        protected void switchFragments() {
+
+            FragmentTransaction fragmentTransaction = getFragmentManager()
+                    .beginTransaction();
+
+            if (fragment != null) {
+                fragmentTransaction
+                        .remove(fragment);
+            }
+
             fragment = new TestFragment();
 
-            getFragmentManager()
-                    .beginTransaction()
-                    .add(CONTAINER_ID, fragment)
+            fragmentTransaction = fragmentTransaction
+                    .add(CONTAINER_ID, fragment);
+
+            fragmentTransaction
                     .commit();
 
         }
@@ -212,12 +119,156 @@ public class MemoryTest {
 
     public static class TestFragment extends Fragment {
 
-        private ImageView imageView;
+        ImageView imageView;
 
         @Nullable
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             return imageView = new ImageView(getActivity());
+        }
+
+        protected void loadImage() {
+            Dali.with(imageView)
+                    .load(IMAGE_URLS[RANDOM.nextInt(IMAGE_URLS.length)])
+                    .placeholder(R.drawable.placeholder)
+                    .into(imageView);
+        }
+
+    }
+
+    private TestActivity testActivity;
+    private ActivityController<TestActivity> activityController;
+
+    public void doUiWork() {
+
+        long lastRecreateTime = System.currentTimeMillis();
+        long lastLoadTime = System.currentTimeMillis();
+
+        createActivity();
+
+        switchFragments();
+        loadImage();
+
+        while (!finish && !leak) {
+
+            TestUtils.delay(40);
+            ShadowLooper.runMainLooperToNextTask();
+
+            long currentTime = System.currentTimeMillis();
+
+            if (currentTime - lastRecreateTime > SCREEN_LIFETIME) {
+                switchFragments();
+                lastRecreateTime = currentTime;
+            }
+
+            if (currentTime - lastLoadTime > LOAD_PERIOD) {
+                loadImage();
+                lastLoadTime = currentTime;
+            }
+
+        }
+
+        destroyActivity();
+
+    }
+
+
+    //List<Object> list = new ArrayList<>();
+
+    protected void loadImage() {
+
+        testActivity.fragment.loadImage();
+
+//        list.add(new Object() {
+//
+//            List<BigInteger> objects = new ArrayList<>();
+//
+//            {
+//                for (int i = 0; i < 1000000; i++) {
+//                    objects.add(new BigInteger(Integer.toString(RANDOM.nextInt(Integer.MAX_VALUE))));
+//                }
+//            }
+//
+//        });
+
+    }
+
+    protected void switchFragments() {
+        testActivity.switchFragments();
+    }
+
+    private void destroyActivity() {
+        activityController.pause().stop().destroy();
+        testActivity = null;
+        activityController = null;
+    }
+
+    private void createActivity() {
+        activityController = Robolectric.buildActivity(TestActivity.class);
+        testActivity = activityController.create().start().resume().visible().get();
+    }
+
+    private class MemoryChecker extends Thread {
+
+        @Override
+        public void run() {
+
+            Runtime runtime = Runtime.getRuntime();
+
+            long memCheck = 0;
+
+            long maxUsedMemory = -1;
+            long maxTotalMemory = -1;
+
+            long lastMaxUsedMemory = -1;
+            long lastMaxTotalMemory = -1;
+
+            while (!finish && !leak) {
+
+                TestUtils.delay(MEM_DUMP_PERIOD);
+
+                // measure min, current, max
+                long totalMemory = runtime.totalMemory();
+                if (maxTotalMemory == -1 || totalMemory > maxTotalMemory) {
+                    maxTotalMemory = totalMemory;
+                }
+                long usedMemory = totalMemory - runtime.freeMemory();
+                if (maxUsedMemory == -1 || usedMemory > maxUsedMemory) {
+                    maxUsedMemory = usedMemory;
+                }
+
+                // init if needed
+                if (lastMaxTotalMemory == -1) {
+                    lastMaxTotalMemory = maxTotalMemory;
+                }
+                if (lastMaxUsedMemory == -1) {
+                    lastMaxUsedMemory = maxUsedMemory;
+                }
+
+                // checks
+                memCheck++;
+                if (memCheck >= MEM_CHECKS_MAX) {
+                    finish = true;
+                } else if (memCheck >= MEM_CHECKS_MIN) {
+                    if (maxUsedMemory > lastMaxUsedMemory && maxTotalMemory > lastMaxTotalMemory) {
+                        leak = true;
+                    }
+                }
+
+                // print stats
+                System.out.println("Count: " + memCheck + "/" + MEM_CHECKS_MAX);
+                System.out.println("Max total: " + maxTotalMemory);
+                System.out.println("Max used: " + maxUsedMemory);
+                System.out.println();
+
+                // keep memory usage to minimum
+                System.gc();
+
+                lastMaxTotalMemory = maxTotalMemory;
+                lastMaxUsedMemory = maxUsedMemory;
+
+            }
+
         }
 
     }

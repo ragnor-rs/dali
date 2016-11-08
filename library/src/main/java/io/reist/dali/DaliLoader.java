@@ -84,7 +84,7 @@ public class DaliLoader implements ImageLoader {
 
         if (request.url == null) {
             callback.onImageLoaded(
-                    BitmapCompat.toBitmap(getApplicationContext(request.context), request.placeholderRes)
+                    BitmapCompat.toBitmap(getApplicationContext(request.attachTarget), request.placeholderRes)
             );
         } else {
             mMainImageLoader.load(request, callback);

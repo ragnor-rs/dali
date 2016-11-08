@@ -92,7 +92,7 @@ public class GlideImageLoader implements ImageLoader {
     private BitmapTypeRequest createBitmapTypeRequest(ImageRequest builder) {
 
         RequestManager requestManager;
-        Object context = builder.context;
+        Object context = builder.attachTarget;
         if (context instanceof android.app.Fragment) {
             requestManager = Glide.with((android.app.Fragment) context);
         } else if (context instanceof android.support.v4.app.Fragment) {
@@ -117,7 +117,7 @@ public class GlideImageLoader implements ImageLoader {
             bitmapTypeRequest.override(builder.targetWidth, builder.targetHeight);
         }
 
-        Context appContext = DaliUtils.getApplicationContext(builder.context);
+        Context appContext = DaliUtils.getApplicationContext(builder.attachTarget);
 
         if (appContext == null) {
             throw new IllegalStateException("application context is null");
