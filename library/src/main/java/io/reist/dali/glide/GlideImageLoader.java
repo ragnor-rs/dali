@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
@@ -15,13 +16,14 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.bumptech.glide.load.resource.bitmap.TransformationUtils;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.animation.NoAnimation;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 import com.bumptech.glide.request.target.BaseTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.ViewTarget;
 
 import java.util.Map;
@@ -31,6 +33,7 @@ import io.reist.dali.DaliCallback;
 import io.reist.dali.DaliUtils;
 import io.reist.dali.ImageLoader;
 import io.reist.dali.ImageRequest;
+import io.reist.dali.ScaleMode;
 import io.reist.dali.drawables.CircleFadingDaliDrawable;
 import io.reist.dali.drawables.DaliDrawable;
 import io.reist.dali.drawables.FadingDaliDrawable;
@@ -77,7 +80,8 @@ public class GlideImageLoader implements ImageLoader {
                         view,
                         request.inCircle,
                         background,
-                        this
+                        this,
+                        request.scaleMode
                 )
         );
 
@@ -126,12 +130,12 @@ public class GlideImageLoader implements ImageLoader {
         if (!builder.disableTransformation) {
             if (builder.blur) {
                 bitmapTypeRequest.transform(
-                        new OnlyScaleDownTransformation(appContext, builder.centerCrop),
+                        new OnlyScaleDownTransformation(appContext, builder.scaleMode),
                         new BlurTransformation(appContext, BLUR_RADIUS, BLUR_SAMPLING)
                 );
             } else {
                 bitmapTypeRequest.transform(
-                        new OnlyScaleDownTransformation(appContext, builder.centerCrop)
+                        new OnlyScaleDownTransformation(appContext, builder.scaleMode)
                 );
             }
         }
@@ -193,12 +197,28 @@ public class GlideImageLoader implements ImageLoader {
         private final boolean inCircle;
         private final boolean background;
         private final GlideImageLoader loader;
+        private final ScaleMode scaleMode;
+        private final int dstWidth;
+        private final int dstHeight;
 
-        GlideImageLoaderViewTarget(View view, boolean inCircle, boolean background, GlideImageLoader loader) {
+        GlideImageLoaderViewTarget(
+                View view,
+                boolean inCircle,
+                boolean background,
+                GlideImageLoader loader,
+                ScaleMode scaleMode
+        ) {
+
             super(view);
+
             this.inCircle = inCircle;
             this.background = background;
             this.loader = loader;
+            this.scaleMode = scaleMode;
+
+            dstWidth = view.getWidth() - view.getPaddingLeft() - view.getPaddingRight();
+            dstHeight = view.getHeight() - view.getPaddingTop() - view.getPaddingBottom();
+
         }
 
         @Override
@@ -224,15 +244,35 @@ public class GlideImageLoader implements ImageLoader {
             final boolean noFade = glideAnimation == null || glideAnimation instanceof NoAnimation;
             DaliDrawable drawable;
             if (inCircle) {
-                drawable = new CircleFadingDaliDrawable(resource, placeholder, resource.getConfig(), noFade);
+                drawable = new CircleFadingDaliDrawable(
+                        resource,
+                        scaleMode,
+                        dstWidth,
+                        dstHeight,
+                        placeholder,
+                        resource.getConfig(),
+                        noFade
+                );
             } else {
                 if (noFade) {
-                    drawable = new DaliDrawable(resource);
+                    drawable = new DaliDrawable(resource, scaleMode, dstWidth, dstHeight);
                 } else {
-                    drawable = new FadingDaliDrawable(resource, placeholder, resource.getConfig());
+                    drawable = new FadingDaliDrawable(
+                            resource,
+                            scaleMode,
+                            dstWidth,
+                            dstHeight,
+                            placeholder,
+                            resource.getConfig()
+                    );
                 }
             }
             onImageReady(drawable);
+        }
+
+        @Override
+        public void getSize(SizeReadyCallback cb) {
+           cb.onSizeReady(dstWidth, dstHeight);
         }
 
     }
@@ -268,52 +308,115 @@ public class GlideImageLoader implements ImageLoader {
      * There's no equivalent for Picasso's onlyScaleDown in Glide. To achieve the same effect,
      * here goes BitmapTransformation
      */
-    private static class OnlyScaleDownTransformation extends CenterCrop {
+    private static class OnlyScaleDownTransformation extends BitmapTransformation {
 
         static final String ID = OnlyScaleDownTransformation.class.getName();
 
-        private final boolean centerCrop;
+        private final ScaleMode scaleMode;
 
-        OnlyScaleDownTransformation(Context context, boolean centerCrop) {
+        OnlyScaleDownTransformation(Context context, ScaleMode scaleMode) {
             super(context);
-            this.centerCrop = centerCrop;
+            this.scaleMode = scaleMode;
         }
 
         @Override
         protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
 
-            if (centerCrop) {
-                float scale;
-                if (toTransform.getWidth() * outHeight > outWidth * toTransform.getHeight()) {
-                    scale = (float) outHeight / (float) toTransform.getHeight();
-                } else {
-                    scale = (float) outWidth / (float) toTransform.getWidth();
-                }
-                if (scale < 1f) {
-                    return super.transform(pool, toTransform, outWidth, outHeight);
-                }
+            Bitmap transformed;
+
+            float scale;
+
+            Bitmap.Config safeConfig = toTransform.getConfig() != null ?
+                    toTransform.getConfig() :
+                    Bitmap.Config.ARGB_8888;
+
+            switch (scaleMode) {
+
+                case CENTER_CROP:
+
+                    // pick greater scale
+                    if (toTransform.getWidth() * outHeight > outWidth * toTransform.getHeight()) {
+                        scale = (float) outHeight / (float) toTransform.getHeight();
+                    } else {
+                        scale = (float) outWidth / (float) toTransform.getWidth();
+                    }
+
+                    if (scale < 1f) {
+                        final Bitmap toReuse = pool.get(
+                                outWidth,
+                                outHeight,
+                                safeConfig
+                        );
+                        transformed = TransformationUtils.centerCrop(toReuse, toTransform, outWidth, outHeight);
+                        if (toReuse != null && toReuse != transformed && !pool.put(toReuse)) {
+                            toReuse.recycle();
+                        }
+                    } else {
+                        transformed = toTransform;
+                    }
+
+                    break;
+
+                case CENTER_INSIDE:
+
+                    // pic lesser scale
+                    if (toTransform.getWidth() * outHeight > outWidth * toTransform.getHeight()) {
+                        scale = (float) outWidth / (float) toTransform.getWidth();
+                    } else {
+                        scale = (float) outHeight / (float) toTransform.getHeight();
+                    }
+
+                    if (scale < 1f) {
+                        transformed = TransformationUtils.fitCenter(toTransform, pool, outWidth, outHeight);
+                    } else {
+                        transformed = toTransform;
+                    }
+
+                    break;
+
+                case FIT_XY:
+
+                    // if total number of pixels decreases
+                    if (toTransform.getWidth() * toTransform.getHeight() > outWidth * outHeight) {
+
+                        final Bitmap toReuse = pool.get(
+                                outWidth,
+                                outHeight,
+                                safeConfig
+                        );
+                        transformed = toReuse == null ? Bitmap.createBitmap(
+                                outWidth,
+                                outHeight,
+                                safeConfig
+                        ) : toReuse;
+
+                        final Paint paint = new Paint(TransformationUtils.PAINT_FLAGS);
+                        final Canvas canvas = new Canvas(transformed);
+                        canvas.drawBitmap(
+                                toTransform,
+                                null,
+                                new RectF(0, 0, outWidth, outHeight),
+                                paint
+                        );
+
+                    } else {
+                        transformed = toTransform;
+                    }
+
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("scaleMode = " + scaleMode);
+
             }
 
-            final Bitmap toReuse = pool.get(
-                    toTransform.getWidth(),
-                    toTransform.getHeight(),
-                    toTransform.getConfig() != null ? toTransform.getConfig() : Bitmap.Config.ARGB_8888
-            );
-
-            if (toReuse != null) {
-                final Paint paint = new Paint(TransformationUtils.PAINT_FLAGS);
-                final Canvas canvas = new Canvas(toReuse);
-                canvas.drawBitmap(toTransform, 0, 0, paint);
-                return toReuse;
-            } else {
-                return Bitmap.createBitmap(toTransform);
-            }
+            return transformed;
 
         }
 
         @Override
         public String getId() {
-            return ID + "(centerCrop = " + centerCrop + ")";
+            return ID + "(" + scaleMode.name() + ")";
         }
 
     }

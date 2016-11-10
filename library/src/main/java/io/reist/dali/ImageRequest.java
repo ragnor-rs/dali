@@ -19,7 +19,6 @@ public class ImageRequest {
     public int targetWidth = 0;
     public int targetHeight = 0;
     public ImageRequestTransformer transformer = ImageRequestTransformer.IDENTITY;
-    public boolean centerCrop = true;
     public boolean defer = true;
     public boolean inCircle = false;
     public Bitmap.Config config = Bitmap.Config.ARGB_8888;
@@ -27,6 +26,7 @@ public class ImageRequest {
     public boolean blur = false;
     public boolean disableTransformation = false;
     public ImageLoader imageLoader = null;
+    public ScaleMode scaleMode = ScaleMode.CENTER_INSIDE;
 
     public ImageRequest() {
         attachTarget = null;
@@ -41,12 +41,6 @@ public class ImageRequest {
         return this;
     }
 
-    public ImageRequest resize(int width, int height) {
-        this.targetWidth = width;
-        this.targetHeight = height;
-        return this;
-    }
-
     @SuppressWarnings("unused")
     public ImageRequest transformer(ImageRequestTransformer transformer) {
         this.transformer = transformer;
@@ -54,8 +48,8 @@ public class ImageRequest {
     }
 
     @SuppressWarnings("unused")
-    public ImageRequest centerCrop(boolean centerCrop) {
-        this.centerCrop = centerCrop;
+    public ImageRequest scaleMode(ScaleMode scaleMode) {
+        this.scaleMode = scaleMode;
         return this;
     }
 

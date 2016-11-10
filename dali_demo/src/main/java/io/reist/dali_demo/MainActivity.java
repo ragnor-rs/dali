@@ -19,7 +19,7 @@ public class MainActivity extends DemoActivity {
 
         setTitle(R.string.activity_main);
 
-        recyclerView.setAdapter(new ImageListAdapter(Dali.with(this), R.layout.item) {
+        recyclerView.setAdapter(new ImageListAdapter() {
 
             @Override
             protected String getUrl(int i) {

@@ -6,16 +6,24 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import io.reist.dali.ScaleMode;
+
 public class CircleFadingDaliDrawable extends FadingDaliDrawable {
 
     public CircleFadingDaliDrawable(
             @NonNull Bitmap bitmap,
+            @NonNull ScaleMode scaleMode,
+            float dstWidth,
+            float dstHeight,
             @Nullable Drawable placeholder,
             @Nullable Bitmap.Config placeholderConfig,
             boolean noFade
     ) {
-        super(bitmap, placeholder, placeholderConfig);
+
+        super(bitmap, scaleMode, dstWidth, dstHeight, placeholder, placeholderConfig);
+
         fadingIn = !noFade;
+
     }
 
     @Override
