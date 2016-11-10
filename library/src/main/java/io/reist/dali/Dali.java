@@ -3,6 +3,7 @@ package io.reist.dali;
 import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 
@@ -22,6 +23,7 @@ import io.reist.dali.glide.GlideImageLoader;
 public class Dali {
 
     private final Object attachTarget;
+    private static final String TAG = Dali.class.getName();
 
     @SuppressWarnings("unused")
     public Context getApplicationContext() {
@@ -44,7 +46,14 @@ public class Dali {
         if (attachTarget == null || applicationContext == null) {
             return new ImageRequest();
         } else {
+            logUrl(url);
             return new ImageRequest(attachTarget).imageLoader(DaliLoader.getInstance()).url(url);
+        }
+    }
+
+    private void logUrl(String url) {
+        if (DaliLoader.getInstance().isDebuggable()) {
+            Log.d(TAG, url != null ? url: "null");
         }
     }
 
@@ -92,6 +101,10 @@ public class Dali {
     @SuppressWarnings("unused")
     public static void cancel(@NonNull Object target) {
         DaliLoader.getInstance().cancel(target);
+    }
+
+    public static void setDebuggable(boolean debuggable) {
+        DaliLoader.getInstance().setDebuggable(debuggable);
     }
 
     /**
