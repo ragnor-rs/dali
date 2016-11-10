@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -94,6 +95,34 @@ public class DaliUtils {
         } else {
             return null;
         }
+    }
+
+    public static float getPlaceholderHeight(float targetHeight, @NonNull Drawable placeholder) {
+        int intrinsicHeight = placeholder.getIntrinsicHeight();
+        return intrinsicHeight == -1 ? targetHeight : intrinsicHeight;
+    }
+
+    public static float getPlaceholderWidth(float targetWidth, @NonNull Drawable placeholder) {
+        int intrinsicWidth = placeholder.getIntrinsicWidth();
+        return intrinsicWidth == -1 ? targetWidth : intrinsicWidth;
+    }
+
+    public static Bitmap.Config getSafeConfig(Bitmap bitmap) {
+        return bitmap.getConfig() != null ?
+                bitmap.getConfig() :
+                Bitmap.Config.ARGB_8888;
+    }
+
+    @NonNull
+    public static Context getApplicationContext(@NonNull ImageRequest request) {
+        Context appContext = null;
+        if (request.attachTarget != null) {
+            appContext = getApplicationContext(request.attachTarget);
+        }
+        if (appContext == null) {
+            throw new IllegalStateException("application context is null");
+        }
+        return appContext;
     }
 
 }

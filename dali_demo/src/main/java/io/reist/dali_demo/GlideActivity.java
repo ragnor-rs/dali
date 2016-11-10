@@ -28,12 +28,12 @@ public class GlideActivity extends DemoActivity {
 
             @Override
             protected String getUrl(int i) {
-                return "https://www.petfinder.com/wp-content/uploads/2012/11/140272627-grooming-needs-senior-cat-632x475.jpg";
+                return "file:///android_asset/image.jpg";
             }
 
         });
 
-        recyclerView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        //recyclerView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
 
     }
 

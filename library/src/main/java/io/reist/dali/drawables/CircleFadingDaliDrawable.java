@@ -2,6 +2,8 @@ package io.reist.dali.drawables;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,25 +15,26 @@ public class CircleFadingDaliDrawable extends FadingDaliDrawable {
     public CircleFadingDaliDrawable(
             @NonNull Bitmap bitmap,
             @NonNull ScaleMode scaleMode,
-            float dstWidth,
-            float dstHeight,
+            float targetWidth,
+            float targetHeight,
             @Nullable Drawable placeholder,
-            @Nullable Bitmap.Config placeholderConfig,
+            @Nullable Bitmap placeholderBitmap,
             boolean noFade
     ) {
 
-        super(bitmap, scaleMode, dstWidth, dstHeight, placeholder, placeholderConfig);
+        super(bitmap, scaleMode, targetWidth, targetHeight, placeholder, placeholderBitmap);
 
         fadingIn = !noFade;
 
     }
 
     @Override
-    protected void drawBitmap(@NonNull Canvas canvas) {
+    protected void drawBitmap(@NonNull Canvas canvas, RectF dst, Paint paint) {
+        float radius = Math.min(dst.width(), dst.height()) / 2;
         canvas.drawCircle(
-                srcWidth / 2,
-                srcHeight / 2,
-                Math.min(srcWidth, srcHeight) / 2,
+                dst.centerX(),
+                dst.centerY(),
+                radius,
                 paint
         );
     }

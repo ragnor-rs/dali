@@ -16,6 +16,7 @@ import io.reist.dali.ScaleMode;
 public abstract class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.ViewHolder> {
 
     private static final ScaleMode[] SCALE_MODES = ScaleMode.values();
+    private static final boolean[] CIRCLE_CROP_SETTINGS = new boolean[] {false, true};
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -28,17 +29,15 @@ public abstract class ImageListAdapter extends RecyclerView.Adapter<ImageListAda
     public void onBindViewHolder(ViewHolder holder, final int position) {
 
         View itemView = holder.itemView;
-        itemView.setBackgroundColor(Color.rgb(
-                (int)(Math.random() * 255),
-                (int)(Math.random() * 255),
-                (int)(Math.random() * 255)
-        ));
+        itemView.setBackgroundColor(Color.GRAY);
 
         int i = holder.getAdapterPosition();
+
         ScaleMode scaleMode = SCALE_MODES[i % SCALE_MODES.length];
+        boolean circleCropSetting = CIRCLE_CROP_SETTINGS[(i / SCALE_MODES.length) % CIRCLE_CROP_SETTINGS.length];
 
         TextView textView = holder.textView;
-        textView.setText(scaleMode.name());
+        textView.setText(scaleMode.name() + "\ninCircle = " + circleCropSetting);
         textView.setTextColor(Color.WHITE);
 
         String url = getUrl(i);
@@ -47,7 +46,8 @@ public abstract class ImageListAdapter extends RecyclerView.Adapter<ImageListAda
         imageView.setPosition(i);
         Dali.with(itemView)
                 .load(url)
-                .inCircle(true)
+                .inCircle(circleCropSetting)
+                .placeholder(android.R.drawable.ic_dialog_alert)
                 .scaleMode(scaleMode)
                 .into(imageView, false);
 

@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import io.reist.dali.DaliCallback;
-import io.reist.dali.DaliUtils;
 import io.reist.dali.ImageLoader;
 import io.reist.dali.ImageRequest;
 import io.reist.dali.ScaleMode;
@@ -39,7 +38,9 @@ import io.reist.dali.drawables.DaliDrawable;
 import io.reist.dali.drawables.FadingDaliDrawable;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 
+import static io.reist.dali.DaliUtils.*;
 import static io.reist.dali.DaliUtils.getPlaceholder;
+import static io.reist.dali.DaliUtils.getPlaceholderHeight;
 import static io.reist.dali.DaliUtils.setBackground;
 import static io.reist.dali.DaliUtils.setDrawable;
 
@@ -61,18 +62,16 @@ public class GlideImageLoader implements ImageLoader {
 
     };
 
-    private static final int BLUR_RADIUS = 8;
-    private static final int BLUR_SAMPLING = 16;
+    private static final int BLUR_RADIUS = 8;           // todo move to ImageRequest as a parameter
+    private static final int BLUR_SAMPLING = 16;        // todo move to ImageRequest as a parameter
 
     private final Map<Object, BaseTarget> targetMap = new WeakHashMap<>();
 
     @Override
     public void load(@NonNull ImageRequest request, @NonNull View view, boolean background) {
-
-        BitmapTypeRequest bitmapTypeRequest = createBitmapTypeRequest(request);
-
+        Context appContext = getApplicationContext(request);
+        BitmapTypeRequest bitmapTypeRequest = createBitmapTypeRequest(request, appContext);
         bitmapTypeRequest.animate(EMPTY_ANIMATOR);
-
         enqueue(
                 view,
                 bitmapTypeRequest,
@@ -81,10 +80,10 @@ public class GlideImageLoader implements ImageLoader {
                         request.inCircle,
                         background,
                         this,
-                        request.scaleMode
+                        request.scaleMode,
+                        Glide.get(appContext).getBitmapPool()
                 )
         );
-
     }
 
     private void enqueue(Object o, BitmapTypeRequest bitmapTypeRequest, BaseTarget<Bitmap> target) {
@@ -93,10 +92,12 @@ public class GlideImageLoader implements ImageLoader {
     }
 
     @NonNull
-    private BitmapTypeRequest createBitmapTypeRequest(ImageRequest builder) {
+    private BitmapTypeRequest createBitmapTypeRequest(ImageRequest request, Context appContext) {
+
+        BitmapTypeRequest bitmapTypeRequest;
 
         RequestManager requestManager;
-        Object attachTarget = builder.attachTarget;
+        Object attachTarget = request.attachTarget;
         if (attachTarget instanceof android.app.Fragment) {
             requestManager = Glide.with((android.app.Fragment) attachTarget);
         } else if (attachTarget instanceof android.support.v4.app.Fragment) {
@@ -110,38 +111,31 @@ public class GlideImageLoader implements ImageLoader {
         } else {
             throw new IllegalStateException("Attach target is " + attachTarget);
         }
+        bitmapTypeRequest = requestManager.load(request.url).asBitmap();
 
-        BitmapTypeRequest bitmapTypeRequest = requestManager.load(builder.url).asBitmap();
-
-        if (builder.placeholderRes != 0) {
-            bitmapTypeRequest.placeholder(builder.placeholderRes);
+        if (request.placeholderRes != 0) {
+            bitmapTypeRequest.placeholder(request.placeholderRes);
         }
 
-        if (builder.targetWidth > 0 && builder.targetHeight > 0) {
-            bitmapTypeRequest.override(builder.targetWidth, builder.targetHeight);
+        if (request.targetWidth > 0 && request.targetHeight > 0) {
+            bitmapTypeRequest.override(request.targetWidth, request.targetHeight);
         }
 
-        Context appContext = DaliUtils.getApplicationContext(builder.attachTarget);
-
-        if (appContext == null) {
-            throw new IllegalStateException("application context is null");
-        }
-
-        if (!builder.disableTransformation) {
-            if (builder.blur) {
+        if (!request.disableTransformation) {
+            if (request.blur) {
                 bitmapTypeRequest.transform(
-                        new OnlyScaleDownTransformation(appContext, builder.scaleMode),
+                        new OnlyScaleDownTransformation(appContext, request.scaleMode),
                         new BlurTransformation(appContext, BLUR_RADIUS, BLUR_SAMPLING)
                 );
             } else {
                 bitmapTypeRequest.transform(
-                        new OnlyScaleDownTransformation(appContext, builder.scaleMode)
+                        new OnlyScaleDownTransformation(appContext, request.scaleMode)
                 );
             }
         }
 
-        if (builder.config != null) {
-            bitmapTypeRequest.format(toGlideFormat(builder.config));
+        if (request.config != null) {
+            bitmapTypeRequest.format(toGlideFormat(request.config));
         }
 
         return bitmapTypeRequest;
@@ -150,9 +144,10 @@ public class GlideImageLoader implements ImageLoader {
 
     @Override
     public void load(@NonNull ImageRequest request, @NonNull DaliCallback callback) {
+        Context appContext = getApplicationContext(request);
         enqueue(
                 callback,
-                createBitmapTypeRequest(request),
+                createBitmapTypeRequest(request, appContext),
                 new GlideImageLoaderCallbackTarget(callback, this)
         );
     }
@@ -198,15 +193,17 @@ public class GlideImageLoader implements ImageLoader {
         private final boolean background;
         private final GlideImageLoader loader;
         private final ScaleMode scaleMode;
-        private final int dstWidth;
-        private final int dstHeight;
+        private final int targetWidth;
+        private final int targetHeight;
+        private final BitmapPool bitmapPool;
 
         GlideImageLoaderViewTarget(
                 View view,
                 boolean inCircle,
                 boolean background,
                 GlideImageLoader loader,
-                ScaleMode scaleMode
+                ScaleMode scaleMode,
+                BitmapPool bitmapPool
         ) {
 
             super(view);
@@ -216,8 +213,10 @@ public class GlideImageLoader implements ImageLoader {
             this.loader = loader;
             this.scaleMode = scaleMode;
 
-            dstWidth = view.getWidth() - view.getPaddingLeft() - view.getPaddingRight();
-            dstHeight = view.getHeight() - view.getPaddingTop() - view.getPaddingBottom();
+            targetWidth = view.getWidth() - view.getPaddingLeft() - view.getPaddingRight();
+            targetHeight = view.getHeight() - view.getPaddingTop() - view.getPaddingBottom();
+
+            this.bitmapPool = bitmapPool;
 
         }
 
@@ -247,23 +246,36 @@ public class GlideImageLoader implements ImageLoader {
                 drawable = new CircleFadingDaliDrawable(
                         resource,
                         scaleMode,
-                        dstWidth,
-                        dstHeight,
+                        targetWidth,
+                        targetHeight,
                         placeholder,
-                        resource.getConfig(),
+                        bitmapPool.get(
+                                (int) getPlaceholderWidth(targetWidth, placeholder),
+                                (int) getPlaceholderHeight(targetHeight, placeholder),
+                                getSafeConfig(resource)
+                        ),
                         noFade
                 );
             } else {
                 if (noFade) {
-                    drawable = new DaliDrawable(resource, scaleMode, dstWidth, dstHeight);
+                    drawable = new DaliDrawable(
+                            resource,
+                            scaleMode,
+                            targetWidth,
+                            targetHeight
+                    );
                 } else {
                     drawable = new FadingDaliDrawable(
                             resource,
                             scaleMode,
-                            dstWidth,
-                            dstHeight,
+                            targetWidth,
+                            targetHeight,
                             placeholder,
-                            resource.getConfig()
+                            bitmapPool.get(
+                                    (int) getPlaceholderWidth(targetWidth, placeholder),
+                                    (int) getPlaceholderHeight(targetHeight, placeholder),
+                                    getSafeConfig(resource)
+                            )
                     );
                 }
             }
@@ -272,7 +284,7 @@ public class GlideImageLoader implements ImageLoader {
 
         @Override
         public void getSize(SizeReadyCallback cb) {
-           cb.onSizeReady(dstWidth, dstHeight);
+           cb.onSizeReady(targetWidth, targetHeight);
         }
 
     }
@@ -326,9 +338,7 @@ public class GlideImageLoader implements ImageLoader {
 
             float scale;
 
-            Bitmap.Config safeConfig = toTransform.getConfig() != null ?
-                    toTransform.getConfig() :
-                    Bitmap.Config.ARGB_8888;
+            Bitmap.Config safeConfig = getSafeConfig(toTransform);
 
             switch (scaleMode) {
 
