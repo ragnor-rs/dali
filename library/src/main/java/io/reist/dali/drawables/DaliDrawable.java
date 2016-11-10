@@ -121,6 +121,11 @@ public class DaliDrawable extends Drawable {
         dst.right = dst.left + imageWidthInView;
         dst.bottom = dst.top + imageHeightInView;
 
+        if (dst.left < 0) dst.left = 0;
+        if (dst.top < 0) dst.top = 0;
+        if (dst.right > targetWidth) dst.right = targetWidth;
+        if (dst.bottom > targetHeight) dst.bottom = targetHeight;
+
     }
 
     protected void drawBitmap(@NonNull Canvas canvas, RectF dst, Paint bitmapPaint) {
