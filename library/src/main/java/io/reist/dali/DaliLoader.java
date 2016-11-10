@@ -12,6 +12,7 @@ public class DaliLoader implements ImageLoader {
 
     private ImageLoader mMainImageLoader;
     private DeferredImageLoader mDeferredImageLoader;
+    private boolean mDebuggable;
 
     private DaliLoader() {
         initMainImageLoader(GlideImageLoader.class);
@@ -90,6 +91,14 @@ public class DaliLoader implements ImageLoader {
             mMainImageLoader.load(request, callback);
         }
 
+    }
+
+    public void setDebuggable(boolean debuggable) {
+        mDebuggable = debuggable;
+    }
+
+    public boolean isDebuggable() {
+        return mDebuggable;
     }
 
     @Override

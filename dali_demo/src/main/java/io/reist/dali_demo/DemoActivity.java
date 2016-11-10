@@ -25,6 +25,7 @@ public class DemoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         Dali.setMainImageLoaderClass(imageLoaderClass);
+        Dali.setDebuggable(true);
 
         setContentView(R.layout.activity_main);
 
