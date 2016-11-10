@@ -122,7 +122,10 @@ public class DeferredImageLoader implements ImageLoader {
         if (width <= 0 || height <= 0) {
             defer(view, new ViewRequestFactory(view, request, background, DaliLoader.getInstance().getMainImageLoader()));
         } else {
-            request.resize(width, height).into(view, background);
+            request.targetSize(
+                    width - view.getPaddingLeft() - view.getPaddingRight(),
+                    height - view.getPaddingTop() - view.getPaddingBottom()
+            ).into(view, background);
         }
 
     }

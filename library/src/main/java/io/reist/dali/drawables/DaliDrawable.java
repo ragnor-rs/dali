@@ -9,12 +9,20 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
+
+import io.reist.dali.ScaleMode;
 
 public class DaliDrawable extends Drawable {
 
     @NonNull
     private final BitmapShader bitmapShader;
+
+    private final ScaleMode scaleMode;
+
+    private final float dstWidth;
+    private final float dstHeight;
 
     private int alpha = 255;
     private ColorFilter colorFilter = null;
@@ -24,20 +32,38 @@ public class DaliDrawable extends Drawable {
     final float srcWidth;
     final float srcHeight;
 
-    public DaliDrawable(@NonNull Bitmap bitmap) {
+    public DaliDrawable(
+            @NonNull Bitmap bitmap,
+            @NonNull ScaleMode scaleMode,
+            float dstWidth,
+            float dstHeight
+    ) {
+
         bitmapShader = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
         srcWidth = bitmap.getWidth();
         srcHeight = bitmap.getHeight();
+
+        this.scaleMode = scaleMode;
+        this.dstWidth = dstWidth;
+        this.dstHeight = dstHeight;
+
     }
 
     @Override
     public void draw(@NonNull Canvas canvas) {
 
-        if (alpha == 0 || srcWidth <= 0 || srcHeight <= 0) {
+        if (alpha == 0 || srcWidth <= 0 || srcHeight <= 0 || dstWidth <= 0 || dstHeight <= 0) {
             return;
         }
 
         canvas.save();
+        drawImage(canvas);
+        canvas.restore();
+
+    }
+
+    @CallSuper
+    protected void drawImage(@NonNull Canvas canvas) {
 
         transform(canvas, srcWidth, srcHeight);
 
@@ -47,33 +73,53 @@ public class DaliDrawable extends Drawable {
 
         drawBitmap(canvas);
 
-        canvas.restore();
-
     }
 
+    @SuppressWarnings("SuspiciousNameCombination")
     void transform(@NonNull Canvas canvas, float srcWidth, float srcHeight) {
 
-        float scale;
+        float scaleX, scaleY;
 
         Rect bounds = getBounds();
 
-        float dstWidth = bounds.width();
-        float dstHeight = bounds.height();
+        switch (scaleMode) {
 
-        if (srcWidth * dstHeight > dstWidth * srcHeight) {
-            scale = dstWidth / srcWidth;
-        } else {
-            scale = dstHeight / srcHeight;
+            case CENTER_CROP:
+                if (srcWidth * dstHeight > dstWidth * srcHeight) {
+                    scaleX = dstHeight / srcHeight;
+                } else {
+                    scaleX = dstWidth / srcWidth;
+                }
+                scaleY = scaleX;
+                break;
+
+            case CENTER_INSIDE:
+                if (srcWidth * dstHeight > dstWidth * srcHeight) {
+                    scaleX = dstWidth / srcWidth;
+                } else {
+                    scaleX = dstHeight / srcHeight;
+                }
+                scaleY = scaleX;
+                break;
+
+            case FIT_XY:
+                scaleX = dstWidth / srcWidth;
+                scaleY = dstHeight / srcHeight;
+                break;
+
+            default:
+                throw new IllegalArgumentException("scaleMode = " + scaleMode);
+
         }
 
-        float finalWidth = srcWidth * scale;
-        float finalHeight = srcHeight * scale;
+        float finalWidth = srcWidth * scaleX;
+        float finalHeight = srcHeight * scaleY;
 
         float finalLeft = bounds.exactCenterX() - finalWidth / 2;
         float finalTop = bounds.exactCenterY() - finalHeight / 2;
 
         canvas.translate(finalLeft, finalTop);
-        canvas.scale(scale, scale);
+        canvas.scale(scaleX, scaleY);
 
     }
 

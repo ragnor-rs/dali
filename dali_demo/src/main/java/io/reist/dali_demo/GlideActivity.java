@@ -24,7 +24,7 @@ public class GlideActivity extends DemoActivity {
 
         setTitle(R.string.activity_glide);
 
-        recyclerView.setAdapter(new ImageListAdapter(Dali.with(this), R.layout.glide_item) {
+        recyclerView.setAdapter(new ImageListAdapter() {
 
             @Override
             protected String getUrl(int i) {

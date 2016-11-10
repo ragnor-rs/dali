@@ -19,10 +19,13 @@ import io.reist.dali.drawables.FadingDaliDrawable;
 @Implements(FadingDaliDrawable.class)
 public class ShadowFadingDaliDrawable extends ShadowDrawable {
 
-    private int key;
+    private int key = -1;
 
     public void __constructor__(
             @NonNull Bitmap bitmap,
+            @NonNull ScaleMode scaleMode,
+            float dstWidth,
+            float dstHeight,
             @Nullable Drawable placeholder,
             @Nullable Bitmap.Config placeholderConfig
     ) {

@@ -31,7 +31,12 @@ public class DrawableTest {
     @Test
     public void daliDrawable() {
 
-        DaliDrawable daliDrawable = new DaliDrawable(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888));
+        DaliDrawable daliDrawable = new DaliDrawable(
+                Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888),
+                ScaleMode.CENTER_INSIDE,
+                1,
+                1
+        );
         assertDrawable(daliDrawable);
 
         // TODO check correctness of drawable size
@@ -43,6 +48,9 @@ public class DrawableTest {
 
         FadingDaliDrawable daliDrawable = new FadingDaliDrawable(
                 Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888),
+                ScaleMode.CENTER_INSIDE,
+                1,
+                1,
                 new BitmapDrawable(
                         RuntimeEnvironment.application.getResources(),
                         Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
@@ -60,6 +68,9 @@ public class DrawableTest {
 
         CircleFadingDaliDrawable daliDrawable = new CircleFadingDaliDrawable(
                 Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888),
+                ScaleMode.CENTER_INSIDE,
+                1,
+                1,
                 new BitmapDrawable(
                         RuntimeEnvironment.application.getResources(),
                         Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)

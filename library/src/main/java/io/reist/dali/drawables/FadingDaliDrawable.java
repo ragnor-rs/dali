@@ -9,6 +9,8 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import io.reist.dali.ScaleMode;
+
 public class FadingDaliDrawable extends DaliDrawable {
 
     public static final float FADE_DURATION = 300;
@@ -31,11 +33,14 @@ public class FadingDaliDrawable extends DaliDrawable {
 
     public FadingDaliDrawable(
             @NonNull Bitmap bitmap,
+            @NonNull ScaleMode scaleMode,
+            float dstWidth,
+            float dstHeight,
             @Nullable Drawable placeholder,
             @Nullable Bitmap.Config placeholderConfig
     ) {
 
-        super(bitmap);
+        super(bitmap, scaleMode, dstWidth, dstHeight);
 
         this.placeholder = placeholder;
         this.placeholderConfig = placeholderConfig;
@@ -46,7 +51,7 @@ public class FadingDaliDrawable extends DaliDrawable {
 
     @SuppressLint("NewApi")
     @Override
-    public void draw(@NonNull Canvas canvas) {
+    public final void draw(@NonNull Canvas canvas) {
 
         if (fadingIn) {
             if (startTime == -1) {
@@ -69,6 +74,18 @@ public class FadingDaliDrawable extends DaliDrawable {
             progress = 1;
         }
 
+        super.draw(canvas);
+
+        if (fadingIn) {
+            invalidateSelf();
+        }
+
+    }
+
+    @SuppressLint("NewApi")
+    @Override
+    protected void drawImage(@NonNull Canvas canvas) {
+
         if (placeholder != null && progress < 1f && placeholderWidth > 0 && placeholderHeight > 0) {
 
             canvas.save();
@@ -85,11 +102,7 @@ public class FadingDaliDrawable extends DaliDrawable {
 
         }
 
-        super.draw(canvas);
-
-        if (fadingIn) {
-            invalidateSelf();
-        }
+        super.drawImage(canvas);
 
     }
 
