@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -97,13 +98,19 @@ public class DaliUtils {
         }
     }
 
-    public static float getPlaceholderHeight(float targetHeight, @NonNull Drawable placeholder) {
-        int intrinsicHeight = placeholder.getIntrinsicHeight();
+    public static float getPlaceholderHeight(float targetHeight, @Nullable Drawable placeholder) {
+        int intrinsicHeight = -1;
+        if (placeholder != null) {
+            intrinsicHeight = placeholder.getIntrinsicHeight();
+        }
         return intrinsicHeight == -1 ? targetHeight : intrinsicHeight;
     }
 
-    public static float getPlaceholderWidth(float targetWidth, @NonNull Drawable placeholder) {
-        int intrinsicWidth = placeholder.getIntrinsicWidth();
+    public static float getPlaceholderWidth(float targetWidth, @Nullable Drawable placeholder) {
+        int intrinsicWidth = -1;
+        if (placeholder != null) {
+            intrinsicWidth = placeholder.getIntrinsicWidth();
+        }
         return intrinsicWidth == -1 ? targetWidth : intrinsicWidth;
     }
 
