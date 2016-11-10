@@ -4,107 +4,97 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 
 import io.reist.dali.ScaleMode;
 
 public class DaliDrawable extends Drawable {
 
-    @NonNull
-    private final BitmapShader bitmapShader;
-
     private final ScaleMode scaleMode;
 
-    private final float dstWidth;
-    private final float dstHeight;
+    private final float targetWidth;
+    private final float targetHeight;
 
     private int alpha = 255;
     private ColorFilter colorFilter = null;
 
-    final Paint paint = new Paint();
-
-    final float srcWidth;
-    final float srcHeight;
+    private final float bitmapWidth;
+    private final float bitmapHeight;
+    private final RectF bitmapDst = new RectF();
+    private final Paint bitmapPaint = new Paint();
 
     public DaliDrawable(
             @NonNull Bitmap bitmap,
             @NonNull ScaleMode scaleMode,
-            float dstWidth,
-            float dstHeight
+            float targetWidth,
+            float targetHeight
     ) {
 
-        bitmapShader = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
-        srcWidth = bitmap.getWidth();
-        srcHeight = bitmap.getHeight();
-
         this.scaleMode = scaleMode;
-        this.dstWidth = dstWidth;
-        this.dstHeight = dstHeight;
+        this.targetWidth = targetWidth;
+        this.targetHeight = targetHeight;
+
+        bitmapWidth = bitmap.getWidth();
+        bitmapHeight = bitmap.getHeight();
+        BitmapShader bitmapShader = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+        transform(bitmapWidth, bitmapHeight, bitmapShader, bitmapDst);
+        bitmapPaint.setShader(bitmapShader);
 
     }
 
     @Override
     public void draw(@NonNull Canvas canvas) {
 
-        if (alpha == 0 || srcWidth <= 0 || srcHeight <= 0 || dstWidth <= 0 || dstHeight <= 0) {
+        if (alpha == 0 || bitmapWidth <= 0 || bitmapHeight <= 0 || targetWidth <= 0 || targetHeight <= 0) {
             return;
         }
 
-        canvas.save();
-        drawImage(canvas);
-        canvas.restore();
+        bitmapPaint.setColorFilter(colorFilter);
+        bitmapPaint.setAlpha(alpha);
 
-    }
-
-    @CallSuper
-    protected void drawImage(@NonNull Canvas canvas) {
-
-        transform(canvas, srcWidth, srcHeight);
-
-        paint.setColorFilter(colorFilter);
-        paint.setAlpha(alpha);
-        paint.setShader(bitmapShader);
-
-        drawBitmap(canvas);
+        drawBitmap(canvas, bitmapDst, bitmapPaint);
 
     }
 
     @SuppressWarnings("SuspiciousNameCombination")
-    void transform(@NonNull Canvas canvas, float srcWidth, float srcHeight) {
+    void transform(
+            float bitmapWidth,
+            float bitmapHeight,
+            BitmapShader bitmapShader,
+            RectF dst
+    ) {
 
         float scaleX, scaleY;
-
-        Rect bounds = getBounds();
 
         switch (scaleMode) {
 
             case CENTER_CROP:
-                if (srcWidth * dstHeight > dstWidth * srcHeight) {
-                    scaleX = dstHeight / srcHeight;
+                if (bitmapWidth * targetHeight > targetWidth * bitmapHeight) {
+                    scaleX = targetHeight / bitmapHeight;
                 } else {
-                    scaleX = dstWidth / srcWidth;
+                    scaleX = targetWidth / bitmapWidth;
                 }
                 scaleY = scaleX;
                 break;
 
             case CENTER_INSIDE:
-                if (srcWidth * dstHeight > dstWidth * srcHeight) {
-                    scaleX = dstWidth / srcWidth;
+                if (bitmapWidth * targetHeight > targetWidth * bitmapHeight) {
+                    scaleX = targetWidth / bitmapWidth;
                 } else {
-                    scaleX = dstHeight / srcHeight;
+                    scaleX = targetHeight / bitmapHeight;
                 }
                 scaleY = scaleX;
                 break;
 
             case FIT_XY:
-                scaleX = dstWidth / srcWidth;
-                scaleY = dstHeight / srcHeight;
+                scaleX = targetWidth / bitmapWidth;
+                scaleY = targetHeight / bitmapHeight;
                 break;
 
             default:
@@ -112,19 +102,34 @@ public class DaliDrawable extends Drawable {
 
         }
 
-        float finalWidth = srcWidth * scaleX;
-        float finalHeight = srcHeight * scaleY;
+        float viewWidthInImage = targetWidth / scaleX;
+        float viewHeightInImage = targetHeight / scaleY;
 
-        float finalLeft = bounds.exactCenterX() - finalWidth / 2;
-        float finalTop = bounds.exactCenterY() - finalHeight / 2;
+        Matrix bitmapMatrix = new Matrix();
+        bitmapMatrix.setTranslate(
+                viewWidthInImage / 2f - bitmapWidth / 2f,
+                viewHeightInImage / 2f - bitmapHeight / 2f
+        );
+        bitmapMatrix.postScale(scaleX, scaleY);
+        bitmapShader.setLocalMatrix(bitmapMatrix);
 
-        canvas.translate(finalLeft, finalTop);
-        canvas.scale(scaleX, scaleY);
+        float imageWidthInView = bitmapWidth * scaleX;
+        float imageHeightInView = bitmapHeight * scaleY;
+
+        dst.left = targetWidth / 2f - imageWidthInView / 2f;
+        dst.top = targetHeight / 2f - imageHeightInView / 2f;
+        dst.right = dst.left + imageWidthInView;
+        dst.bottom = dst.top + imageHeightInView;
+
+        if (dst.left < 0) dst.left = 0;
+        if (dst.top < 0) dst.top = 0;
+        if (dst.right > targetWidth) dst.right = targetWidth;
+        if (dst.bottom > targetHeight) dst.bottom = targetHeight;
 
     }
 
-    protected void drawBitmap(@NonNull Canvas canvas) {
-        canvas.drawRect(0, 0, srcWidth, srcHeight, paint);
+    protected void drawBitmap(@NonNull Canvas canvas, RectF dst, Paint bitmapPaint) {
+        canvas.drawRect(dst, bitmapPaint);
     }
 
     @Override

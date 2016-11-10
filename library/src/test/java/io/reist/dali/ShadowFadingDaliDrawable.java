@@ -9,7 +9,6 @@ import org.robolectric.annotation.Implements;
 import org.robolectric.internal.ShadowExtractor;
 import org.robolectric.shadows.ShadowDrawable;
 
-import io.reist.dali.TestShadowBitmap;
 import io.reist.dali.drawables.FadingDaliDrawable;
 
 /**
@@ -24,10 +23,10 @@ public class ShadowFadingDaliDrawable extends ShadowDrawable {
     public void __constructor__(
             @NonNull Bitmap bitmap,
             @NonNull ScaleMode scaleMode,
-            float dstWidth,
-            float dstHeight,
+            float targetWidth,
+            float targetHeight,
             @Nullable Drawable placeholder,
-            @Nullable Bitmap.Config placeholderConfig
+            @Nullable Bitmap placeholderBitmap
     ) {
         Object shadow = ShadowExtractor.extract(bitmap);
         if (shadow instanceof TestShadowBitmap) {
