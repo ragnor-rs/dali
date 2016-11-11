@@ -16,7 +16,7 @@ import io.reist.dali.ScaleMode;
 
 public class FadingDaliDrawable extends DaliDrawable {
 
-    public static final float FADE_DURATION = 10000; // todo move to ImageRequest as a parameter
+    public static final float FADE_DURATION = 400; // todo move to ImageRequest as a parameter
 
     private float progress = 1;
     private long startTime = -1;
