@@ -19,8 +19,8 @@ public class DaliDrawable extends Drawable {
 
     private final ScaleMode scaleMode;
 
-    private final float targetWidth;
-    private final float targetHeight;
+    protected final float targetWidth;
+    protected final float targetHeight;
 
     private int alpha = 255;
     private ColorFilter colorFilter = null;
