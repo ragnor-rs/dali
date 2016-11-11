@@ -87,7 +87,6 @@ public class Dali {
         if (context instanceof Activity) {
             return ((Activity) context);
         } else if (context instanceof ContextWrapper) {
-            // for fragment dialogs
             Context parent = ((ContextWrapper) context).getBaseContext();
             return extractActivity(parent);
         } else {
