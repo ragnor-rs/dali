@@ -26,7 +26,7 @@ public class CircleFadingDaliDrawable extends FadingDaliDrawable {
 
     @Override
     protected void drawBitmap(@NonNull Canvas canvas, RectF dst, Paint paint) {
-        float radius = Math.min(dst.width(), dst.height()) / 2;
+        float radius = Math.min(targetWidth, targetHeight) / 2;
         canvas.drawCircle(
                 dst.centerX(),
                 dst.centerY(),
