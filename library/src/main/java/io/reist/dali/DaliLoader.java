@@ -58,11 +58,22 @@ public class DaliLoader implements ImageLoader {
 
         cancel(view);
 
+        int viewWidth = view.getWidth();
+        int viewHeight = view.getHeight();
+
+        if (viewWidth > 0 && viewHeight > 0) {
+            request.targetSize(
+                    viewWidth - view.getPaddingLeft() - view.getPaddingRight(),
+                    viewHeight - view.getPaddingTop() - view.getPaddingBottom()
+            );
+        }
+
+        // must follow after target size determination
         if (request.transformer != null) {
             request = request.transformer.transform(request);
         }
 
-        if (request.defer && (request.targetWidth <= 0 || request.targetHeight <= 0)) {
+        if (request.defer && (request.getTargetWidth() <= 0 || request.getTargetHeight() <= 0)) {
             mDeferredImageLoader.load(request, view, background);
         } else {
             if (request.url == null) {

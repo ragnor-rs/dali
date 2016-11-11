@@ -68,11 +68,18 @@ public class DeferredImageLoader implements ImageLoader {
                 return true;
             }
 
-            int width = target.getWidth();
-            int height = target.getHeight();
+            int viewWidth = target.getWidth();
+            int viewHeight = target.getHeight();
 
-            if (width <= 0 || height <= 0) {
+            if (viewWidth <= 0 || viewHeight <= 0) {
                 return true;
+            }
+
+            if (viewWidth > 0 && viewHeight > 0) {
+                imageRequest.targetSize(
+                        viewWidth - target.getPaddingLeft() - target.getPaddingRight(),
+                        viewHeight - target.getPaddingTop() - target.getPaddingBottom()
+                );
             }
 
             mainImageLoader.load(imageRequest, target, background);
@@ -109,21 +116,15 @@ public class DeferredImageLoader implements ImageLoader {
 
     @Override
     public void load(@NonNull ImageRequest request, @NonNull View view, boolean background) {
-
-        int width, height;
-
-        width = view.getWidth();
-        height = view.getHeight();
-
-        if (width <= 0 || height <= 0) {
-            defer(view, new ViewRequestFactory(view, request, background, DaliLoader.getInstance().getMainImageLoader()));
-        } else {
-            request.targetSize(
-                    width - view.getPaddingLeft() - view.getPaddingRight(),
-                    height - view.getPaddingTop() - view.getPaddingBottom()
-            ).into(view, background);
-        }
-
+        defer(
+                view,
+                new ViewRequestFactory(
+                        view,
+                        request,
+                        background,
+                        DaliLoader.getInstance().getMainImageLoader()
+                )
+        );
     }
 
     @Override

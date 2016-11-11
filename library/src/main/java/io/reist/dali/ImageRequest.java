@@ -16,8 +16,6 @@ public class ImageRequest {
     public final Object attachTarget;
 
     public String url = null;
-    public int targetWidth = 0;
-    public int targetHeight = 0;
     public ImageRequestTransformer transformer = ImageRequestTransformer.IDENTITY;
     public boolean defer = true;
     public boolean inCircle = false;
@@ -27,6 +25,9 @@ public class ImageRequest {
     public boolean disableTransformation = false;
     public ImageLoader imageLoader = null;
     public ScaleMode scaleMode = ScaleMode.CENTER_INSIDE;
+
+    private int targetWidth = 0;
+    private int targetHeight = 0;
 
     public ImageRequest() {
         attachTarget = null;
@@ -102,7 +103,7 @@ public class ImageRequest {
         }
     }
 
-    public ImageRequest targetSize(int w, int h) {
+    ImageRequest targetSize(int w, int h) {
         targetWidth = w;
         targetHeight = h;
         return this;
@@ -117,6 +118,14 @@ public class ImageRequest {
     public ImageRequest imageLoader(ImageLoader imageLoader) {
         this.imageLoader = imageLoader;
         return this;
+    }
+
+    public int getTargetWidth() {
+        return targetWidth;
+    }
+
+    public int getTargetHeight() {
+        return targetHeight;
     }
 
 }

@@ -137,8 +137,10 @@ public class GlideImageLoader implements ImageLoader {
             bitmapTypeRequest.placeholder(request.placeholderRes);
         }
 
-        if (request.targetWidth > 0 && request.targetHeight > 0) {
-            bitmapTypeRequest.override(request.targetWidth, request.targetHeight);
+        int targetWidth = request.getTargetWidth();
+        int targetHeight = request.getTargetHeight();
+        if (targetWidth > 0 && targetHeight > 0) {
+            bitmapTypeRequest.override(targetWidth, targetHeight);
         }
 
         if (!request.disableTransformation) {
