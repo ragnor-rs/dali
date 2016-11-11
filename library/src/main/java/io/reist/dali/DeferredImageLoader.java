@@ -82,7 +82,7 @@ public class DeferredImageLoader implements ImageLoader {
                 );
             }
 
-            mainImageLoader.load(imageRequest, target, background);
+            DaliLoader.getInstance().load(imageRequest, target, background);
 
             vto.removeOnPreDrawListener(this);
 
