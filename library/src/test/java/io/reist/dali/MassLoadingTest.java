@@ -156,7 +156,6 @@ public abstract class MassLoadingTest {
         }
 
         @Override
-
         public void onSetImageDrawable(int expectedKey, int actualKey) {
 
             System.out.println("onSetImageDrawable(" + expectedKey + ", " + actualKey + ")");

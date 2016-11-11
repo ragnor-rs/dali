@@ -12,15 +12,19 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.ImageView;
 
+import io.reist.dali.drawables.CircleFadingDaliDrawable;
+import io.reist.dali.drawables.FadingDaliDrawable;
+
 public class DaliUtils {
 
-    static void setPlaceholder(
-            @NonNull ImageRequest builder,
+    public static void setPlaceholder(
+            @NonNull ImageRequest request,
             @NonNull View view,
-            boolean background
+            boolean background,
+            @Nullable Bitmap placeholderBitmap
     ) {
 
-        int placeholderRes = builder.placeholderRes;
+        int placeholderRes = request.placeholderRes;
 
         if (placeholderRes == 0) {
             return;
@@ -31,10 +35,34 @@ public class DaliUtils {
                 placeholderRes
         );
 
-        if (background) {
-            setBackground(drawable, view);
+        FadingDaliDrawable placeholderDrawable;
+
+        if (request.inCircle) {
+            placeholderDrawable = new CircleFadingDaliDrawable(
+                    null,
+                    request.scaleMode,
+                    view.getWidth() - view.getPaddingLeft() - view.getPaddingRight(),
+                    view.getHeight() - view.getPaddingTop() - view.getPaddingBottom(),
+                    drawable,
+                    placeholderBitmap,
+                    true
+            );
         } else {
-            setDrawable(drawable, view);
+            placeholderDrawable = new FadingDaliDrawable(
+                    null,
+                    request.scaleMode,
+                    view.getWidth() - view.getPaddingLeft() - view.getPaddingRight(),
+                    view.getHeight() - view.getPaddingTop() - view.getPaddingBottom(),
+                    drawable,
+                    placeholderBitmap,
+                    true
+            );
+        }
+
+        if (background) {
+            setBackground(placeholderDrawable, view);
+        } else {
+            setDrawable(placeholderDrawable, view);
         }
 
     }
@@ -114,8 +142,8 @@ public class DaliUtils {
         return intrinsicWidth == -1 ? targetWidth : intrinsicWidth;
     }
 
-    public static Bitmap.Config getSafeConfig(Bitmap bitmap) {
-        return bitmap.getConfig() != null ?
+    public static Bitmap.Config getSafeConfig(@Nullable Bitmap bitmap) {
+        return bitmap != null && bitmap.getConfig() != null ?
                 bitmap.getConfig() :
                 Bitmap.Config.ARGB_8888;
     }

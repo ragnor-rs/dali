@@ -13,7 +13,7 @@ import io.reist.dali.ScaleMode;
 public class CircleFadingDaliDrawable extends FadingDaliDrawable {
 
     public CircleFadingDaliDrawable(
-            @NonNull Bitmap bitmap,
+            @Nullable Bitmap bitmap,
             @NonNull ScaleMode scaleMode,
             float targetWidth,
             float targetHeight,
@@ -21,15 +21,22 @@ public class CircleFadingDaliDrawable extends FadingDaliDrawable {
             @Nullable Bitmap placeholderBitmap,
             boolean noFade
     ) {
-
-        super(bitmap, scaleMode, targetWidth, targetHeight, placeholder, placeholderBitmap);
-
-        fadingIn = !noFade;
-
+        super(bitmap, scaleMode, targetWidth, targetHeight, placeholder, placeholderBitmap, noFade);
     }
 
     @Override
     protected void drawBitmap(@NonNull Canvas canvas, RectF dst, Paint paint) {
+        float radius = Math.min(dst.width(), dst.height()) / 2;
+        canvas.drawCircle(
+                dst.centerX(),
+                dst.centerY(),
+                radius,
+                paint
+        );
+    }
+
+    @Override
+    protected void drawPlaceholder(@NonNull Canvas canvas, RectF dst, Paint paint) {
         float radius = Math.min(dst.width(), dst.height()) / 2;
         canvas.drawCircle(
                 dst.centerX(),

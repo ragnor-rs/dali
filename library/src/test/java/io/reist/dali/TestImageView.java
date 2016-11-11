@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import org.mockito.Mockito;
 import org.robolectric.internal.ShadowExtractor;
 
+import io.reist.dali.drawables.DaliDrawable;
 import io.reist.dali.drawables.FadingDaliDrawable;
 
 /**
@@ -34,6 +35,12 @@ public class TestImageView extends ImageView {
     public void setImageDrawable(Drawable drawable) {
 
         super.setImageDrawable(drawable);
+
+        if (drawable instanceof DaliDrawable) {
+            if (!((DaliDrawable) drawable).hasBitmap()) { // ignore placeholders
+                return;
+            }
+        }
 
         int actualKey = -1;
 

@@ -21,14 +21,18 @@ public class ShadowFadingDaliDrawable extends ShadowDrawable {
     private int key = -1;
 
     public void __constructor__(
-            @NonNull Bitmap bitmap,
+            @Nullable Bitmap bitmap,
             @NonNull ScaleMode scaleMode,
             float targetWidth,
             float targetHeight,
             @Nullable Drawable placeholder,
-            @Nullable Bitmap placeholderBitmap
+            @Nullable Bitmap placeholderBitmap,
+            boolean noFade
     ) {
-        Object shadow = ShadowExtractor.extract(bitmap);
+        Object shadow = null;
+        if (bitmap != null) {
+            shadow = ShadowExtractor.extract(bitmap);
+        }
         if (shadow instanceof TestShadowBitmap) {
             TestShadowBitmap shadowBitmap = (TestShadowBitmap) shadow;
             key = shadowBitmap.getActualKey();

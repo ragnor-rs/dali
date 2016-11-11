@@ -66,7 +66,7 @@ public class DaliLoader implements ImageLoader {
             mDeferredImageLoader.load(request, view, background);
         } else {
             if (request.url == null) {
-                setPlaceholder(request, view, background);
+                setPlaceholder(request, view, background, null);
             } else {
                 mMainImageLoader.load(request, view, background);
             }

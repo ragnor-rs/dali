@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import io.reist.dali.DaliCallback;
+import io.reist.dali.DaliUtils;
 import io.reist.dali.ImageLoader;
 import io.reist.dali.ImageRequest;
 import io.reist.dali.ScaleMode;
@@ -38,9 +39,11 @@ import io.reist.dali.drawables.DaliDrawable;
 import io.reist.dali.drawables.FadingDaliDrawable;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 
-import static io.reist.dali.DaliUtils.*;
+import static io.reist.dali.DaliUtils.getApplicationContext;
 import static io.reist.dali.DaliUtils.getPlaceholder;
 import static io.reist.dali.DaliUtils.getPlaceholderHeight;
+import static io.reist.dali.DaliUtils.getPlaceholderWidth;
+import static io.reist.dali.DaliUtils.getSafeConfig;
 import static io.reist.dali.DaliUtils.setBackground;
 import static io.reist.dali.DaliUtils.setDrawable;
 
@@ -69,9 +72,25 @@ public class GlideImageLoader implements ImageLoader {
 
     @Override
     public void load(@NonNull ImageRequest request, @NonNull View view, boolean background) {
+
         Context appContext = getApplicationContext(request);
+
+        BitmapPool bitmapPool = Glide.get(appContext).getBitmapPool();
+
+        DaliUtils.setPlaceholder(
+                request,
+                view,
+                background,
+                bitmapPool.get(
+                        view.getWidth(),
+                        view.getHeight(),
+                        request.config
+                )
+        );
+
         BitmapTypeRequest bitmapTypeRequest = createBitmapTypeRequest(request, appContext);
         bitmapTypeRequest.animate(EMPTY_ANIMATOR);
+
         enqueue(
                 view,
                 bitmapTypeRequest,
@@ -81,9 +100,10 @@ public class GlideImageLoader implements ImageLoader {
                         background,
                         this,
                         request.scaleMode,
-                        Glide.get(appContext).getBitmapPool()
+                        bitmapPool
                 )
         );
+
     }
 
     private void enqueue(Object o, BitmapTypeRequest bitmapTypeRequest, BaseTarget<Bitmap> target) {
@@ -257,27 +277,19 @@ public class GlideImageLoader implements ImageLoader {
                         noFade
                 );
             } else {
-                if (noFade) {
-                    drawable = new DaliDrawable(
-                            resource,
-                            scaleMode,
-                            targetWidth,
-                            targetHeight
-                    );
-                } else {
-                    drawable = new FadingDaliDrawable(
-                            resource,
-                            scaleMode,
-                            targetWidth,
-                            targetHeight,
-                            placeholder,
-                            bitmapPool.get(
-                                    (int) getPlaceholderWidth(targetWidth, placeholder),
-                                    (int) getPlaceholderHeight(targetHeight, placeholder),
-                                    getSafeConfig(resource)
-                            )
-                    );
-                }
+                drawable = new FadingDaliDrawable(
+                        resource,
+                        scaleMode,
+                        targetWidth,
+                        targetHeight,
+                        placeholder,
+                        bitmapPool.get(
+                                (int) getPlaceholderWidth(targetWidth, placeholder),
+                                (int) getPlaceholderHeight(targetHeight, placeholder),
+                                getSafeConfig(resource)
+                        ),
+                        noFade
+                );
             }
             onImageReady(drawable);
         }

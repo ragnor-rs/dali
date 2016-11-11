@@ -16,7 +16,7 @@ import io.reist.dali.ScaleMode;
 public abstract class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.ViewHolder> {
 
     private static final ScaleMode[] SCALE_MODES = ScaleMode.values();
-    private static final boolean[] CIRCLE_CROP_SETTINGS = new boolean[] {false, true};
+    private static final boolean[] CIRCLE_CROP_SETTINGS = new boolean[] {true, false};
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -33,8 +33,8 @@ public abstract class ImageListAdapter extends RecyclerView.Adapter<ImageListAda
 
         int i = holder.getAdapterPosition();
 
-        ScaleMode scaleMode = SCALE_MODES[i % SCALE_MODES.length];
-        boolean circleCropSetting = CIRCLE_CROP_SETTINGS[(i / SCALE_MODES.length) % CIRCLE_CROP_SETTINGS.length];
+        boolean circleCropSetting = CIRCLE_CROP_SETTINGS[i % CIRCLE_CROP_SETTINGS.length];
+        ScaleMode scaleMode = SCALE_MODES[(i / CIRCLE_CROP_SETTINGS.length) % SCALE_MODES.length];
 
         TextView textView = holder.textView;
         textView.setText(scaleMode.name() + "\ninCircle = " + circleCropSetting);

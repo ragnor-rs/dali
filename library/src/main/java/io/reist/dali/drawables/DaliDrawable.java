@@ -11,6 +11,7 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import io.reist.dali.ScaleMode;
 
@@ -30,7 +31,7 @@ public class DaliDrawable extends Drawable {
     private final Paint bitmapPaint = new Paint();
 
     public DaliDrawable(
-            @NonNull Bitmap bitmap,
+            @Nullable Bitmap bitmap,
             @NonNull ScaleMode scaleMode,
             float targetWidth,
             float targetHeight
@@ -40,18 +41,23 @@ public class DaliDrawable extends Drawable {
         this.targetWidth = targetWidth;
         this.targetHeight = targetHeight;
 
-        bitmapWidth = bitmap.getWidth();
-        bitmapHeight = bitmap.getHeight();
-        BitmapShader bitmapShader = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
-        transform(bitmapWidth, bitmapHeight, bitmapShader, bitmapDst);
-        bitmapPaint.setShader(bitmapShader);
+        if (bitmap == null) {
+            bitmapWidth = -1;
+            bitmapHeight = -1;
+        } else {
+            bitmapWidth = bitmap.getWidth();
+            bitmapHeight = bitmap.getHeight();
+            BitmapShader bitmapShader = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+            transform(bitmapWidth, bitmapHeight, bitmapShader, bitmapDst);
+            bitmapPaint.setShader(bitmapShader);
+        }
 
     }
 
     @Override
     public void draw(@NonNull Canvas canvas) {
 
-        if (alpha == 0 || bitmapWidth <= 0 || bitmapHeight <= 0 || targetWidth <= 0 || targetHeight <= 0) {
+        if (alpha == 0 || bitmapWidth <= 0 || !hasBitmap() || targetHeight <= 0) {
             return;
         }
 
@@ -166,6 +172,10 @@ public class DaliDrawable extends Drawable {
     @Override
     public ColorFilter getColorFilter() {
         return colorFilter;
+    }
+
+    public boolean hasBitmap() {
+        return bitmapWidth > 0 && bitmapHeight > 0;
     }
 
 }

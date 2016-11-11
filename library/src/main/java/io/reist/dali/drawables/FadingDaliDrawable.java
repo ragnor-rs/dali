@@ -16,13 +16,13 @@ import io.reist.dali.ScaleMode;
 
 public class FadingDaliDrawable extends DaliDrawable {
 
-    public static final float FADE_DURATION = 300; // todo move to ImageRequest as a parameter
+    public static final float FADE_DURATION = 10000; // todo move to ImageRequest as a parameter
 
     private float progress = 1;
     private long startTime = -1;
     private int originalAlpha;
 
-    boolean fadingIn;
+    private boolean fadingIn;
 
     private final float placeholderWidth;
     private final float placeholderHeight;
@@ -30,17 +30,23 @@ public class FadingDaliDrawable extends DaliDrawable {
     private final Paint placeholderPaint = new Paint();
 
     public FadingDaliDrawable(
-            @NonNull Bitmap bitmap,
+            @Nullable Bitmap bitmap,
             @NonNull ScaleMode scaleMode,
             float targetWidth,
             float targetHeight,
             @Nullable Drawable placeholder,
-            @Nullable Bitmap placeholderBitmap
+            @Nullable Bitmap placeholderBitmap,
+            boolean noFade
     ) {
 
         super(bitmap, scaleMode, targetWidth, targetHeight);
 
-        fadingIn = true;
+        if (noFade) {
+            progress = bitmap == null ? 0 : 1;
+            originalAlpha = 255;
+        } else {
+            fadingIn = true;
+        }
 
         if (placeholder == null) {
 
@@ -60,7 +66,7 @@ public class FadingDaliDrawable extends DaliDrawable {
                 placeholderBitmap = Bitmap.createBitmap(
                         (int) placeholderWidth,
                         (int) placeholderHeight,
-                        bitmap.getConfig()
+                        DaliUtils.getSafeConfig(bitmap)
                 );
             }
             Canvas canvas = new Canvas(placeholderBitmap);
@@ -99,8 +105,6 @@ public class FadingDaliDrawable extends DaliDrawable {
                     setAlpha((int) (originalAlpha * progress));
                 }
             }
-        } else {
-            progress = 1;
         }
 
         if (placeholderWidth > 0 && placeholderHeight > 0 && progress < 1f) {

@@ -55,7 +55,8 @@ public class DrawableTest {
                         RuntimeEnvironment.application.getResources(),
                         Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
                 ),
-                null
+                null,
+                false
         );
         checkFadingDrawable(daliDrawable);
 
