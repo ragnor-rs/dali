@@ -2,9 +2,9 @@ package io.reist.dali;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 
 import io.reist.dali.glide.GlideImageLoader;
@@ -86,9 +86,9 @@ public class Dali {
     private static Activity extractActivity(Context context) {
         if (context instanceof Activity) {
             return ((Activity) context);
-        } else if (context instanceof ContextThemeWrapper) {
+        } else if (context instanceof ContextWrapper) {
             // for fragment dialogs
-            Context parent = ((ContextThemeWrapper) context).getBaseContext();
+            Context parent = ((ContextWrapper) context).getBaseContext();
             return extractActivity(parent);
         } else {
             return null;
