@@ -103,7 +103,7 @@ public class ImageRequest {
         }
     }
 
-    ImageRequest targetSize(int w, int h) {
+    public ImageRequest targetSize(int w, int h) {
         targetWidth = w;
         targetHeight = h;
         return this;
