@@ -27,7 +27,12 @@ public class FadingDaliDrawable extends DaliDrawable {
     private final float placeholderWidth;
     private final float placeholderHeight;
     private final RectF placeholderDst = new RectF();
-    private final Paint placeholderPaint = new Paint();
+
+    @Nullable
+    private Bitmap placeholderBitmap;
+
+    @Nullable
+    private Paint placeholderPaint;
 
     public FadingDaliDrawable(
             @Nullable Bitmap bitmap,
@@ -40,6 +45,8 @@ public class FadingDaliDrawable extends DaliDrawable {
     ) {
 
         super(bitmap, scaleMode, targetWidth, targetHeight);
+
+        this.placeholderBitmap = placeholderBitmap;
 
         if (noFade) {
             progress = bitmap == null ? 0 : 1;
@@ -61,7 +68,6 @@ public class FadingDaliDrawable extends DaliDrawable {
                 return;
             }
 
-            // todo use pool
             if (placeholderBitmap == null) {
                 placeholderBitmap = Bitmap.createBitmap(
                         (int) placeholderWidth,
@@ -78,6 +84,8 @@ public class FadingDaliDrawable extends DaliDrawable {
                     Shader.TileMode.CLAMP
             );
             transform(placeholderWidth, placeholderHeight, placeholderShader, placeholderDst);
+
+            placeholderPaint = new Paint();
             placeholderPaint.setShader(placeholderShader);
 
         }
@@ -87,6 +95,10 @@ public class FadingDaliDrawable extends DaliDrawable {
     @SuppressLint("NewApi")
     @Override
     public void draw(@NonNull Canvas canvas) {
+
+        if (placeholderPaint == null) {
+            return;
+        }
 
         if (fadingIn) {
             if (startTime == -1) {
@@ -139,6 +151,20 @@ public class FadingDaliDrawable extends DaliDrawable {
 
     public float getProgress() {
         return progress;
+    }
+
+    @Override
+    public void recycle() {
+
+        super.recycle();
+
+        placeholderPaint = null;
+
+        if (placeholderBitmap != null) {
+            placeholderBitmap.recycle();
+            placeholderBitmap = null;
+        }
+
     }
 
 }

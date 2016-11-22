@@ -22,13 +22,18 @@ public class DaliDrawable extends Drawable {
     protected final float targetWidth;
     protected final float targetHeight;
 
+    @Nullable
+    private Bitmap bitmap;
+
     private int alpha = 255;
     private ColorFilter colorFilter = null;
 
     private final float bitmapWidth;
     private final float bitmapHeight;
     private final RectF bitmapDst = new RectF();
-    private final Paint bitmapPaint = new Paint();
+
+    @Nullable
+    private Paint bitmapPaint;
 
     public DaliDrawable(
             @Nullable Bitmap bitmap,
@@ -36,6 +41,8 @@ public class DaliDrawable extends Drawable {
             float targetWidth,
             float targetHeight
     ) {
+
+        this.bitmap = bitmap;
 
         this.scaleMode = scaleMode;
         this.targetWidth = targetWidth;
@@ -45,11 +52,16 @@ public class DaliDrawable extends Drawable {
             bitmapWidth = -1;
             bitmapHeight = -1;
         } else {
+
             bitmapWidth = bitmap.getWidth();
             bitmapHeight = bitmap.getHeight();
+
             BitmapShader bitmapShader = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
             transform(bitmapWidth, bitmapHeight, bitmapShader, bitmapDst);
+
+            bitmapPaint = new Paint();
             bitmapPaint.setShader(bitmapShader);
+
         }
 
     }
@@ -57,7 +69,7 @@ public class DaliDrawable extends Drawable {
     @Override
     public void draw(@NonNull Canvas canvas) {
 
-        if (alpha == 0 || bitmapWidth <= 0 || !hasBitmap() || targetHeight <= 0) {
+        if (alpha == 0 || bitmapWidth <= 0 || !hasBitmap() || targetHeight <= 0 || bitmapPaint == null) {
             return;
         }
 
@@ -176,6 +188,17 @@ public class DaliDrawable extends Drawable {
 
     public boolean hasBitmap() {
         return bitmapWidth > 0 && bitmapHeight > 0;
+    }
+
+    public void recycle() {
+
+        bitmapPaint = null;
+
+        if (bitmap != null) {
+            bitmap.recycle();
+            bitmap = null;
+        }
+
     }
 
 }
