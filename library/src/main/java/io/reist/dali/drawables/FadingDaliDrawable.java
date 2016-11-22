@@ -96,10 +96,6 @@ public class FadingDaliDrawable extends DaliDrawable {
     @Override
     public void draw(@NonNull Canvas canvas) {
 
-        if (placeholderPaint == null) {
-            return;
-        }
-
         if (fadingIn) {
             if (startTime == -1) {
                 progress = 0;
@@ -119,7 +115,7 @@ public class FadingDaliDrawable extends DaliDrawable {
             }
         }
 
-        if (placeholderWidth > 0 && placeholderHeight > 0 && progress < 1f) {
+        if (placeholderWidth > 0 && placeholderHeight > 0 && progress < 1f && placeholderPaint != null) {
 
             placeholderPaint.setColorFilter(getColorFilter());
             placeholderPaint.setAlpha((int) ((1f - progress) * originalAlpha));
