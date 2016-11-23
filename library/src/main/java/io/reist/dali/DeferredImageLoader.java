@@ -56,8 +56,8 @@ public class DeferredImageLoader implements ImageLoader {
 
             View target = this.target.get();
 
-            if (target == null) {
-                return true;
+            if (target == null || imageRequest == null) {
+                return false;
             }
 
             try {
@@ -67,14 +67,14 @@ public class DeferredImageLoader implements ImageLoader {
                 try {
 
                     if (!vto.isAlive()) {
-                        return true;
+                        return false;
                     }
 
                     int viewWidth = target.getWidth();
                     int viewHeight = target.getHeight();
 
                     if (viewWidth <= 0 || viewHeight <= 0) {
-                        return true;
+                        return false;
                     }
 
                     if (viewWidth > 0 && viewHeight > 0) {
