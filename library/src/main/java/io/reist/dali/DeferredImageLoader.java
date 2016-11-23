@@ -23,7 +23,7 @@ public class DeferredImageLoader implements ImageLoader {
 
     /**
      * It's ok that the map is never queried because the loading process starts in
-     * {@link ViewRequestFactory#ViewRequestFactory(View, ImageRequest, boolean, ImageLoader)}.
+     * {@link ViewRequestFactory#ViewRequestFactory(View, ImageRequest, boolean)}.
      * In here, a pre-draw listener is created. The listener requests an image after the
      * attached {@link ImageView} size has its size calculated.
      */
@@ -31,22 +31,19 @@ public class DeferredImageLoader implements ImageLoader {
 
     protected static class ViewRequestFactory implements ViewTreeObserver.OnPreDrawListener {
 
-        private final ImageRequest imageRequest;
+        private ImageRequest imageRequest;
         private final WeakReference<View> target;
         private final boolean background;
-        private final ImageLoader mainImageLoader;
 
         ViewRequestFactory(
                 View target,
                 ImageRequest imageRequest,
-                boolean background,
-                ImageLoader mainImageLoader
+                boolean background
         ) {
 
             this.imageRequest = imageRequest;
             this.target = new WeakReference<>(target);
             this.background = background;
-            this.mainImageLoader = mainImageLoader;
 
             ViewTreeObserver viewTreeObserver = target.getViewTreeObserver();
             viewTreeObserver.addOnPreDrawListener(this);
@@ -68,25 +65,30 @@ public class DeferredImageLoader implements ImageLoader {
                 return true;
             }
 
-            int viewWidth = target.getWidth();
-            int viewHeight = target.getHeight();
+            try {
 
-            if (viewWidth <= 0 || viewHeight <= 0) {
+                int viewWidth = target.getWidth();
+                int viewHeight = target.getHeight();
+
+                if (viewWidth <= 0 || viewHeight <= 0) {
+                    return true;
+                }
+
+                if (viewWidth > 0 && viewHeight > 0) {
+                    imageRequest.targetSize(
+                            viewWidth - target.getPaddingLeft() - target.getPaddingRight(),
+                            viewHeight - target.getPaddingTop() - target.getPaddingBottom()
+                    );
+                }
+
+                DaliLoader.getInstance().getMainImageLoader().load(imageRequest, target, background);
+
                 return true;
+
+            } finally {
+                vto.removeOnPreDrawListener(this);
+                imageRequest = null;
             }
-
-            if (viewWidth > 0 && viewHeight > 0) {
-                imageRequest.targetSize(
-                        viewWidth - target.getPaddingLeft() - target.getPaddingRight(),
-                        viewHeight - target.getPaddingTop() - target.getPaddingBottom()
-                );
-            }
-
-            mainImageLoader.load(imageRequest, target, background);
-
-            vto.removeOnPreDrawListener(this);
-
-            return true;
 
         }
 
@@ -105,6 +107,7 @@ public class DeferredImageLoader implements ImageLoader {
             }
 
             vto.removeOnPreDrawListener(this);
+            imageRequest = null;
 
         }
 
@@ -121,8 +124,7 @@ public class DeferredImageLoader implements ImageLoader {
                 new ViewRequestFactory(
                         view,
                         request,
-                        background,
-                        DaliLoader.getInstance()
+                        background
                 )
         );
     }

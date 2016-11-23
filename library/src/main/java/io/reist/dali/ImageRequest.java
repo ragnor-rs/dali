@@ -23,7 +23,6 @@ public class ImageRequest {
     public @DrawableRes int placeholderRes;
     public boolean blur = false;
     public boolean disableTransformation = false;
-    public ImageLoader imageLoader = null;
     public ScaleMode scaleMode = ScaleMode.CENTER_INSIDE;
 
     private int targetWidth = 0;
@@ -92,15 +91,11 @@ public class ImageRequest {
     }
 
     public void into(@NonNull View view, boolean background) {
-        if (imageLoader != null) {
-            imageLoader.load(this, view, background);
-        }
+        DaliLoader.getInstance().load(this, view, background);
     }
 
     public void into(@NonNull DaliCallback callback) {
-        if (imageLoader != null) {
-            imageLoader.load(this, callback);
-        }
+        DaliLoader.getInstance().load(this, callback);
     }
 
     public ImageRequest targetSize(int w, int h) {
@@ -112,11 +107,6 @@ public class ImageRequest {
     @SuppressWarnings("unused")
     public ImageRequest disableTransformation(boolean disableTransformation) {
         this.disableTransformation = disableTransformation;
-        return this;
-    }
-
-    public ImageRequest imageLoader(ImageLoader imageLoader) {
-        this.imageLoader = imageLoader;
         return this;
     }
 

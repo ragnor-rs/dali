@@ -77,7 +77,7 @@ public class DaliUtils {
             if (view instanceof ImageView) {
                 return ((ImageView) view).getDrawable();
             } else {
-                throw new UnsupportedOperationException("Cannot get placeholder for " + view);
+                return null;
             }
         }
     }
@@ -98,8 +98,6 @@ public class DaliUtils {
 
             imageView.setImageDrawable(drawable);
 
-        } else {
-            throw new UnsupportedOperationException("Cannot set foreground for " + view);
         }
 
     }
@@ -166,14 +164,11 @@ public class DaliUtils {
                 Bitmap.Config.ARGB_8888;
     }
 
-    @NonNull
+    @Nullable
     public static Context getApplicationContext(@NonNull ImageRequest request) {
         Context appContext = null;
         if (request.attachTarget != null) {
             appContext = getApplicationContext(request.attachTarget);
-        }
-        if (appContext == null) {
-            throw new IllegalStateException("application context is null");
         }
         return appContext;
     }

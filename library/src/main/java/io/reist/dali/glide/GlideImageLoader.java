@@ -24,10 +24,12 @@ import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 import com.bumptech.glide.request.target.BaseTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
 
+import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.WeakHashMap;
 
 import io.reist.dali.DaliCallback;
+import io.reist.dali.DaliLoader;
 import io.reist.dali.DaliUtils;
 import io.reist.dali.ImageLoader;
 import io.reist.dali.ImageRequest;
@@ -39,8 +41,6 @@ import jp.wasabeef.glide.transformations.BlurTransformation;
 
 import static io.reist.dali.DaliUtils.getApplicationContext;
 import static io.reist.dali.DaliUtils.getPlaceholder;
-import static io.reist.dali.DaliUtils.getPlaceholderHeight;
-import static io.reist.dali.DaliUtils.getPlaceholderWidth;
 import static io.reist.dali.DaliUtils.getSafeConfig;
 import static io.reist.dali.DaliUtils.setBackground;
 import static io.reist.dali.DaliUtils.setDrawable;
@@ -73,15 +73,22 @@ public class GlideImageLoader implements ImageLoader {
 
         Context appContext = getApplicationContext(request);
 
+        if (appContext == null) {
+            return;
+        }
+
         BitmapPool bitmapPool = Glide.get(appContext).getBitmapPool();
+
+        int targetWidth = view.getWidth() - view.getPaddingLeft() - view.getPaddingRight();
+        int targetHeight = view.getHeight() - view.getPaddingTop() - view.getPaddingBottom();
 
         DaliUtils.setPlaceholder(
                 request,
                 view,
                 background,
                 bitmapPool.get(
-                        view.getWidth(),
-                        view.getHeight(),
+                        targetWidth,
+                        targetHeight,
                         request.config
                 )
         );
@@ -94,11 +101,16 @@ public class GlideImageLoader implements ImageLoader {
                 bitmapTypeRequest,
                 new GlideImageLoaderViewTarget(
                         view,
+                        targetWidth,
+                        targetHeight,
+                        request.scaleMode,
                         request.inCircle,
                         background,
-                        this,
-                        request.scaleMode,
-                        bitmapPool
+                        bitmapPool.get(
+                                targetWidth,
+                                targetHeight,
+                                request.config
+                        )
                 )
         );
 
@@ -164,22 +176,33 @@ public class GlideImageLoader implements ImageLoader {
 
     @Override
     public void load(@NonNull ImageRequest request, @NonNull DaliCallback callback) {
+
         Context appContext = getApplicationContext(request);
+
+        if (appContext == null) {
+            return;
+        }
+
         enqueue(
                 callback,
                 createBitmapTypeRequest(request, appContext),
-                new GlideImageLoaderCallbackTarget(callback, this)
+                new GlideImageLoaderCallbackTarget(callback)
         );
+
     }
 
     private static DecodeFormat toGlideFormat(Bitmap.Config config) {
         switch (config) {
+
             case RGB_565:
                 return DecodeFormat.PREFER_RGB_565;
+
             case ARGB_8888:
                 return DecodeFormat.PREFER_ARGB_8888;
+
             default:
                 throw new IllegalArgumentException("Unsupported Bitmap config: " + config);
+
         }
     }
 
@@ -209,36 +232,35 @@ public class GlideImageLoader implements ImageLoader {
      */
     private static class GlideImageLoaderViewTarget extends SimpleTarget<Bitmap> {
 
-        private final boolean inCircle;
-        private final boolean background;
+        private final WeakReference<View> view;
+
         private final int targetWidth;
         private final int targetHeight;
+        private final ScaleMode scaleMode;
+        private final boolean inCircle;
+        private final boolean background;
 
-        private GlideImageLoader loader;
-        private ScaleMode scaleMode;
-        private BitmapPool bitmapPool;
-        private View view;
+        private final WeakReference<Bitmap> cached;
 
-        GlideImageLoaderViewTarget(
+        private GlideImageLoaderViewTarget(
                 View view,
+                int targetWidth,
+                int targetHeight,
+                ScaleMode scaleMode,
                 boolean inCircle,
                 boolean background,
-                GlideImageLoader loader,
-                ScaleMode scaleMode,
-                BitmapPool bitmapPool
+                Bitmap cached
         ) {
 
-            this.view = view;
+            this.view = new WeakReference<>(view);
 
+            this.targetWidth = targetWidth;
+            this.targetHeight = targetHeight;
+            this.scaleMode = scaleMode;
             this.inCircle = inCircle;
             this.background = background;
-            this.loader = loader;
-            this.scaleMode = scaleMode;
 
-            targetWidth = view.getWidth() - view.getPaddingLeft() - view.getPaddingRight();
-            targetHeight = view.getHeight() - view.getPaddingTop() - view.getPaddingBottom();
-
-            this.bitmapPool = bitmapPool;
+            this.cached = new WeakReference<>(cached);
 
         }
 
@@ -251,19 +273,40 @@ public class GlideImageLoader implements ImageLoader {
         }
 
         private void onImageReady(Drawable drawable) {
+
+            View view = this.view.get();
+
+            if (view == null) {
+                return;
+            }
+
             if (background) {
                 setBackground(drawable, view);
             } else {
                 setDrawable(drawable, view);
             }
-            loader.targetMap.remove(this);
+
+            ImageLoader mainImageLoader = DaliLoader.getInstance().getMainImageLoader();
+            if (mainImageLoader instanceof GlideImageLoader) {
+                ((GlideImageLoader) mainImageLoader).targetMap.remove(this);
+            }
+
         }
 
         @Override
         public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+
+            View view = this.view.get();
+
+            if (view == null) {
+                return;
+            }
+
+            Bitmap cached = this.cached.get();
+
+            DaliDrawable drawable;
             Drawable placeholder = getPlaceholder(view, background);
             final boolean noFade = glideAnimation == null || glideAnimation instanceof NoAnimation;
-            DaliDrawable drawable;
             if (inCircle) {
                 drawable = new CircleFadingDaliDrawable(
                         resource,
@@ -271,11 +314,7 @@ public class GlideImageLoader implements ImageLoader {
                         targetWidth,
                         targetHeight,
                         placeholder,
-                        bitmapPool.get(
-                                (int) getPlaceholderWidth(targetWidth, placeholder),
-                                (int) getPlaceholderHeight(targetHeight, placeholder),
-                                getSafeConfig(resource)
-                        ),
+                        cached,
                         noFade
                 );
             } else {
@@ -285,23 +324,13 @@ public class GlideImageLoader implements ImageLoader {
                         targetWidth,
                         targetHeight,
                         placeholder,
-                        bitmapPool.get(
-                                (int) getPlaceholderWidth(targetWidth, placeholder),
-                                (int) getPlaceholderHeight(targetHeight, placeholder),
-                                getSafeConfig(resource)
-                        ),
+                        cached,
                         noFade
                 );
             }
-            onImageReady(drawable);
-        }
 
-        @Override
-        public void onLoadCleared(Drawable placeholder) {
-            scaleMode = null;
-            loader = null;
-            bitmapPool = null;
-            view = null;
+            onImageReady(drawable);
+
         }
 
         @Override
@@ -314,13 +343,11 @@ public class GlideImageLoader implements ImageLoader {
 
     private static class GlideImageLoaderCallbackTarget extends SimpleTarget<Bitmap> {
 
-        private DaliCallback callback;
-        private GlideImageLoader loader;
+        private WeakReference<DaliCallback> callback;
 
-        GlideImageLoaderCallbackTarget(DaliCallback callback, GlideImageLoader loader) {
+        GlideImageLoaderCallbackTarget(DaliCallback callback) {
             super();
-            this.callback = callback;
-            this.loader = loader;
+            this.callback = new WeakReference<>(callback);
         }
 
         @Override
@@ -328,19 +355,25 @@ public class GlideImageLoader implements ImageLoader {
 
         @Override
         public void onLoadFailed(Exception e, Drawable errorDrawable) {
-            loader.targetMap.remove(this);
+            ImageLoader mainImageLoader = DaliLoader.getInstance().getMainImageLoader();
+            if (mainImageLoader instanceof GlideImageLoader) {
+                ((GlideImageLoader) mainImageLoader).targetMap.remove(this);
+            }
         }
 
         @Override
         public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-            callback.onImageLoaded(resource);
-            loader.targetMap.remove(this);
-        }
 
-        @Override
-        public void onLoadCleared(Drawable placeholder) {
-            callback = null;
-            loader = null;
+            DaliCallback daliCallback = this.callback.get();
+            if (daliCallback != null) {
+                daliCallback.onImageLoaded(resource);
+            }
+
+            ImageLoader mainImageLoader = DaliLoader.getInstance().getMainImageLoader();
+            if (mainImageLoader instanceof GlideImageLoader) {
+                ((GlideImageLoader) mainImageLoader).targetMap.remove(this);
+            }
+
         }
 
         @Override

@@ -22,9 +22,6 @@ public class DaliDrawable extends Drawable {
     protected final float targetWidth;
     protected final float targetHeight;
 
-    @Nullable
-    private Bitmap bitmap;
-
     private int alpha = 255;
     private ColorFilter colorFilter = null;
 
@@ -41,8 +38,6 @@ public class DaliDrawable extends Drawable {
             float targetWidth,
             float targetHeight
     ) {
-
-        this.bitmap = bitmap;
 
         this.scaleMode = scaleMode;
         this.targetWidth = targetWidth;

@@ -47,7 +47,7 @@ public class Dali {
             return new ImageRequest();
         } else {
             logUrl(url);
-            return new ImageRequest(attachTarget).imageLoader(DaliLoader.getInstance()).url(url);
+            return new ImageRequest(attachTarget).url(url);
         }
     }
 

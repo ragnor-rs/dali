@@ -29,9 +29,6 @@ public class FadingDaliDrawable extends DaliDrawable {
     private final RectF placeholderDst = new RectF();
 
     @Nullable
-    private Bitmap placeholderBitmap;
-
-    @Nullable
     private Paint placeholderPaint;
 
     public FadingDaliDrawable(
@@ -45,8 +42,6 @@ public class FadingDaliDrawable extends DaliDrawable {
     ) {
 
         super(bitmap, scaleMode, targetWidth, targetHeight);
-
-        this.placeholderBitmap = placeholderBitmap;
 
         if (noFade) {
             progress = bitmap == null ? 0 : 1;
