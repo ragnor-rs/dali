@@ -23,8 +23,6 @@ import com.bumptech.glide.request.animation.NoAnimation;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 import com.bumptech.glide.request.target.BaseTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.target.SizeReadyCallback;
-import com.bumptech.glide.request.target.ViewTarget;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -209,15 +207,17 @@ public class GlideImageLoader implements ImageLoader {
      *
      * TODO remove this class and replace with circleCrop() from Glide v4
      */
-    private static class GlideImageLoaderViewTarget extends ViewTarget<View, Bitmap> {
+    private static class GlideImageLoaderViewTarget extends SimpleTarget<Bitmap> {
 
         private final boolean inCircle;
         private final boolean background;
-        private final GlideImageLoader loader;
-        private final ScaleMode scaleMode;
         private final int targetWidth;
         private final int targetHeight;
-        private final BitmapPool bitmapPool;
+
+        private GlideImageLoader loader;
+        private ScaleMode scaleMode;
+        private BitmapPool bitmapPool;
+        private View view;
 
         GlideImageLoaderViewTarget(
                 View view,
@@ -228,7 +228,7 @@ public class GlideImageLoader implements ImageLoader {
                 BitmapPool bitmapPool
         ) {
 
-            super(view);
+            this.view = view;
 
             this.inCircle = inCircle;
             this.background = background;
@@ -297,16 +297,25 @@ public class GlideImageLoader implements ImageLoader {
         }
 
         @Override
-        public void getSize(SizeReadyCallback cb) {
-           cb.onSizeReady(targetWidth, targetHeight);
+        public void onLoadCleared(Drawable placeholder) {
+            scaleMode = null;
+            loader = null;
+            bitmapPool = null;
+            view = null;
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            Glide.clear(this);
         }
 
     }
 
     private static class GlideImageLoaderCallbackTarget extends SimpleTarget<Bitmap> {
 
-        private final DaliCallback callback;
-        private final GlideImageLoader loader;
+        private DaliCallback callback;
+        private GlideImageLoader loader;
 
         GlideImageLoaderCallbackTarget(DaliCallback callback, GlideImageLoader loader) {
             super();
@@ -326,6 +335,18 @@ public class GlideImageLoader implements ImageLoader {
         public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
             callback.onImageLoaded(resource);
             loader.targetMap.remove(this);
+        }
+
+        @Override
+        public void onLoadCleared(Drawable placeholder) {
+            callback = null;
+            loader = null;
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            Glide.clear(this);
         }
 
     }
