@@ -73,20 +73,11 @@ public class DaliLoader implements ImageLoader {
         if (request.defer && (request.getTargetWidth() <= 0 || request.getTargetHeight() <= 0)) {
             mDeferredImageLoader.load(request, view, background);
         } else {
-
-            // actual loading starts here
-
-            // request transformer must come after target size determination
-            if (request.transformer != null) {
-                request = request.transformer.transform(request);
-            }
-
             if (request.url == null) {
                 setPlaceholder(request, view, background, null);
             } else {
                 mMainImageLoader.load(request, view, background);
             }
-
         }
 
     }

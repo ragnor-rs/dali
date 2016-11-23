@@ -78,6 +78,10 @@ public class GlideImageLoader implements ImageLoader {
             return;
         }
 
+        if (request.transformer != null) {
+            request = request.transformer.transform(request);
+        }
+
         BitmapPool bitmapPool = Glide.get(appContext).getBitmapPool();
 
         int targetWidth = view.getWidth() - view.getPaddingLeft() - view.getPaddingRight();
