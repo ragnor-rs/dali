@@ -25,6 +25,7 @@ import com.bumptech.glide.request.target.BaseTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
 
 import java.lang.ref.WeakReference;
+import java.util.Collection;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -217,7 +218,8 @@ public class GlideImageLoader implements ImageLoader {
 
     @Override
     public void cancelAll() {
-        for (BaseTarget target : targetMap.values()) {
+        Collection<BaseTarget> values = targetMap.values();
+        for (BaseTarget target : values) {
             Glide.clear(target);
         }
         targetMap.clear();
@@ -274,21 +276,27 @@ public class GlideImageLoader implements ImageLoader {
 
         private void onImageReady(Drawable drawable) {
 
-            View view = this.view.get();
+            try {
 
-            if (view == null) {
-                return;
-            }
+                View view = this.view.get();
 
-            if (background) {
-                setBackground(drawable, view);
-            } else {
-                setDrawable(drawable, view);
-            }
+                if (view == null) {
+                    return;
+                }
 
-            ImageLoader mainImageLoader = DaliLoader.getInstance().getMainImageLoader();
-            if (mainImageLoader instanceof GlideImageLoader) {
-                ((GlideImageLoader) mainImageLoader).targetMap.remove(this);
+                if (background) {
+                    setBackground(drawable, view);
+                } else {
+                    setDrawable(drawable, view);
+                }
+
+            } finally {
+
+                ImageLoader mainImageLoader = DaliLoader.getInstance().getMainImageLoader();
+                if (mainImageLoader instanceof GlideImageLoader) {
+                    ((GlideImageLoader) mainImageLoader).targetMap.remove(this);
+                }
+
             }
 
         }

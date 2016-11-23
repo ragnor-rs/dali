@@ -6,6 +6,7 @@ import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
 import java.lang.ref.WeakReference;
+import java.util.Collection;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -59,35 +60,41 @@ public class DeferredImageLoader implements ImageLoader {
                 return true;
             }
 
-            ViewTreeObserver vto = target.getViewTreeObserver();
-
-            if (!vto.isAlive()) {
-                return true;
-            }
-
             try {
 
-                int viewWidth = target.getWidth();
-                int viewHeight = target.getHeight();
+                ViewTreeObserver vto = target.getViewTreeObserver();
 
-                if (viewWidth <= 0 || viewHeight <= 0) {
+                try {
+
+                    if (!vto.isAlive()) {
+                        return true;
+                    }
+
+                    int viewWidth = target.getWidth();
+                    int viewHeight = target.getHeight();
+
+                    if (viewWidth <= 0 || viewHeight <= 0) {
+                        return true;
+                    }
+
+                    if (viewWidth > 0 && viewHeight > 0) {
+                        imageRequest.targetSize(
+                                viewWidth - target.getPaddingLeft() - target.getPaddingRight(),
+                                viewHeight - target.getPaddingTop() - target.getPaddingBottom()
+                        );
+                    }
+
+                    DaliLoader.getInstance().getMainImageLoader().load(imageRequest, target, background);
+
                     return true;
+
+                } finally {
+                    vto.removeOnPreDrawListener(this);
+                    imageRequest = null;
                 }
-
-                if (viewWidth > 0 && viewHeight > 0) {
-                    imageRequest.targetSize(
-                            viewWidth - target.getPaddingLeft() - target.getPaddingRight(),
-                            viewHeight - target.getPaddingTop() - target.getPaddingBottom()
-                    );
-                }
-
-                DaliLoader.getInstance().getMainImageLoader().load(imageRequest, target, background);
-
-                return true;
 
             } finally {
-                vto.removeOnPreDrawListener(this);
-                imageRequest = null;
+                DaliLoader.getInstance().getDeferredImageLoader().requestMap.remove(target);
             }
 
         }
@@ -100,14 +107,16 @@ public class DeferredImageLoader implements ImageLoader {
                 return;
             }
 
-            ViewTreeObserver vto = target.getViewTreeObserver();
+            try {
 
-            if (!vto.isAlive()) {
-                return;
+                ViewTreeObserver vto = target.getViewTreeObserver();
+
+                vto.removeOnPreDrawListener(this);
+                imageRequest = null;
+
+            } finally {
+                DaliLoader.getInstance().getDeferredImageLoader().requestMap.remove(target);
             }
-
-            vto.removeOnPreDrawListener(this);
-            imageRequest = null;
 
         }
 
@@ -147,7 +156,8 @@ public class DeferredImageLoader implements ImageLoader {
 
     @Override
     public void cancelAll() {
-        for (ViewRequestFactory factory : requestMap.values()) {
+        Collection<ViewRequestFactory> values = requestMap.values();
+        for (ViewRequestFactory factory : values) {
             factory.cancel();
         }
         requestMap.clear();
