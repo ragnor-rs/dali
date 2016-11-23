@@ -190,6 +190,7 @@ public class DaliDrawable extends Drawable {
         return bitmapWidth > 0 && bitmapHeight > 0;
     }
 
+    /*
     public void recycle() {
 
         bitmapPaint = null;
@@ -200,5 +201,6 @@ public class DaliDrawable extends Drawable {
         }
 
     }
+    */
 
 }

@@ -149,6 +149,7 @@ public class FadingDaliDrawable extends DaliDrawable {
         return progress;
     }
 
+    /*
     @Override
     public void recycle() {
 
@@ -162,5 +163,6 @@ public class FadingDaliDrawable extends DaliDrawable {
         }
 
     }
+    */
 
 }

@@ -13,7 +13,6 @@ import android.view.View;
 import android.widget.ImageView;
 
 import io.reist.dali.drawables.CircleFadingDaliDrawable;
-import io.reist.dali.drawables.DaliDrawable;
 import io.reist.dali.drawables.FadingDaliDrawable;
 
 public class DaliUtils {
@@ -92,10 +91,10 @@ public class DaliUtils {
 
             ImageView imageView = (ImageView) view;
 
-            Drawable oldDrawable = imageView.getDrawable();
-            if (oldDrawable instanceof DaliDrawable) {
-                ((DaliDrawable) oldDrawable).recycle();
-            }
+//            Drawable oldDrawable = imageView.getDrawable();
+//            if (oldDrawable instanceof DaliDrawable) {
+//                ((DaliDrawable) oldDrawable).recycle();
+//            }
 
             imageView.setImageDrawable(drawable);
 
@@ -112,10 +111,10 @@ public class DaliUtils {
             @NonNull View view
     ) {
 
-        Drawable oldBackground = view.getBackground();
-        if (oldBackground instanceof DaliDrawable) {
-            ((DaliDrawable) oldBackground).recycle();
-        }
+//        Drawable oldBackground = view.getBackground();
+//        if (oldBackground instanceof DaliDrawable) {
+//            ((DaliDrawable) oldBackground).recycle();
+//        }
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             view.setBackgroundDrawable(background);
