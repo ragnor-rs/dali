@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowNetwork;
@@ -29,7 +30,7 @@ import static junit.framework.Assert.fail;
  * Created by Reist on 08.11.16.
  */
 
-@RunWith(RobolectricGradle3TestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(
         constants = BuildConfig.class,
         sdk = Build.VERSION_CODES.JELLY_BEAN,
