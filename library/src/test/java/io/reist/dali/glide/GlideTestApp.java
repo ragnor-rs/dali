@@ -3,6 +3,7 @@ package io.reist.dali.glide;
 import android.app.Application;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 
 /**
  * Created by Reist on 15.06.16.
@@ -23,7 +24,10 @@ class GlideTestApp extends Application {
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException(e);
         }
-        applicationInfo.metaData.remove(GlideImageLoaderModule.class.getName());
+
+        //applicationInfo.metaData.remove(GlideImageLoaderModule.class.getName());
+        applicationInfo.metaData = new Bundle();
+
         applicationInfo.metaData.putString(GlideTestModule.class.getName(), "GlideModule");
 
     }
